@@ -44,9 +44,8 @@ const Sidebar = () => {
   return (
     <aside className="w-64 bg-slate-900 text-white h-screen sticky top-0 flex flex-col">
       <div className="p-6 flex items-center gap-3 border-b border-slate-800">
-        <div className="bg-blue-600 p-2 rounded-lg">
-          <Hotel size={24} />
-        </div>
+        {/* Replace Hotel icon with logo image */}
+        <img src="/logo.png" alt="Royal Springs Logo" className="w-10 h-10 object-contain bg-blue-600 p-2 rounded-lg" />
         <div>
           <h1 className="font-bold text-lg leading-tight">Royal Springs</h1>
           <p className="text-xs text-slate-400">ERP System</p>
