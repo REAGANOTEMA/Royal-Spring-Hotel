@@ -4,19 +4,51 @@ import React from 'react';
 
 const Footer = () => {
   return (
-    <footer className="w-full py-6 px-4 border-t bg-white mt-auto">
-      <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-        <div className="text-sm text-gray-600">
-          <p>© {new Date().getFullYear()} Royal Springs Resort. All rights reserved.</p>
-          <p className="font-medium">Built by Breagan Otema</p>
+    <footer className="w-full py-8 px-6 bg-gray-900 text-white mt-auto border-t border-gray-800">
+      <div className="container mx-auto flex flex-col md:flex-row justify-between items-start gap-6">
+        {/* Left Section: Logo and Copyright */}
+        <div className="flex flex-col items-center md:items-start">
+          <img src="/logo.png" alt="Royal Springs Resort Logo" className="w-32 mb-4 object-contain" />
+          <p className="text-lg font-semibold text-gray-300">
+            © {new Date().getFullYear()} Royal Springs Resort. All rights reserved.
+          </p>
+          <p className="font-medium text-gray-400">Built by Breagan Otema</p>
         </div>
+
+        {/* Middle Section: Quick Links */}
+        <div className="flex flex-col md:flex-row gap-6 md:gap-12 text-center md:text-left">
+          <div>
+            <h3 className="text-xl font-semibold text-gray-300 mb-2">Quick Links</h3>
+            <ul className="space-y-2 text-gray-400">
+              <li><a href="/" className="hover:text-green-500">Home</a></li>
+              <li><a href="/rooms" className="hover:text-green-500">Rooms</a></li>
+              <li><a href="/book" className="hover:text-green-500">Book Now</a></li>
+              <li><a href="/about" className="hover:text-green-500">About Us</a></li>
+              <li><a href="/contact" className="hover:text-green-500">Contact</a></li>
+              <li><a href="/careers" className="hover:text-green-500">Careers</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-xl font-semibold text-gray-300 mb-2">Pages</h3>
+            <ul className="space-y-2 text-gray-400">
+              <li><a href="/rooms" className="hover:text-green-500">Our Rooms</a></li>
+              <li><a href="/bookings" className="hover:text-green-500">Bookings</a></li>
+              <li><a href="/guests" className="hover:text-green-500">Guest Services</a></li>
+              <li><a href="/finance" className="hover:text-green-500">Finance</a></li>
+              <li><a href="/incidents" className="hover:text-green-500">Incidents</a></li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Right Section: Contact & Support */}
         <div className="text-center md:text-right">
-          <p className="text-sm text-gray-500 mb-1">Designed and Managed by Nexterp Systems</p>
+          <p className="text-sm text-gray-500 mb-2">Designed and Managed by Nexterp Systems</p>
           <a 
             href="https://wa.me/256772514889" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="inline-flex items-center text-green-600 hover:text-green-700 font-semibold transition-colors"
+            className="inline-flex items-center text-green-500 hover:text-green-600 font-semibold transition-colors duration-300 mb-2"
           >
             <span className="mr-2">Support: +256772514889</span>
             <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
