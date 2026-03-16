@@ -17,20 +17,15 @@ import {
   FileBarChart,
   MessageSquare,
   ShieldAlert,
-  ImageIcon
+  ImageIcon,
+  Menu,
+  X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
 
-const Sidebar = () => {
-  const location = useLocation();
-  const [role, setRole] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string | null>(null);
-
-  useEffect(() => {
-    setRole(localStorage.getItem('userRole') || 'staff');
-    setUserName(localStorage.getItem('userName') || 'Staff Member');
-  }, []);
-
+const SidebarContent = ({ role, userName, location, onClose }: any) => {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', roles: ['director', 'general_manager', 'hr', 'staff'] },
     { icon: MessageSquare, label: 'Messages', path: '/messages', roles: ['director', 'general_manager', 'staff'] },
@@ -51,7 +46,7 @@ const Sidebar = () => {
   const filteredItems = menuItems.filter(item => role && item.roles.includes(role));
 
   return (
-    <aside className="w-64 bg-slate-950 text-white h-screen sticky top-0 flex flex-col border-r border-slate-800">
+    <div className="flex flex-col h-full bg-slate-950 text-white">
       <div className="p-8 flex flex-col items-center gap-4 border-b border-slate-900">
         <img src="/logo.png" alt="Royal Springs Logo" className="h-16 object-contain" />
         <div className="text-center">
@@ -65,6 +60,7 @@ const Sidebar = () => {
           <Link
             key={item.path}
             to={item.path}
+            onClick={onClose}
             className={cn(
               "flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-300 group",
               location.pathname === item.path 
@@ -96,6 +92,7 @@ const Sidebar = () => {
           onClick={() => {
             localStorage.removeItem('userRole');
             localStorage.removeItem('userName');
+            onClose && onClose();
           }}
           className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-red-950/30 hover:text-red-500 transition-all duration-300 font-bold text-sm"
         >
@@ -103,7 +100,47 @@ const Sidebar = () => {
           <span>Logout</span>
         </Link>
       </div>
-    </aside>
+    </div>
+  );
+};
+
+const Sidebar = () => {
+  const location = useLocation();
+  const [role, setRole] = useState<string | null>(null);
+  const [userName, setUserName] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+
+  useEffect(() => {
+    setRole(localStorage.getItem('userRole') || 'staff');
+    setUserName(localStorage.getItem('userName') || 'Staff Member');
+  }, []);
+
+  return (
+    <>
+      {/* Desktop Sidebar */}
+      <aside className="hidden lg:flex w-64 h-screen sticky top-0 flex-col border-r border-slate-800">
+        <SidebarContent role={role} userName={userName} location={location} />
+      </aside>
+
+      {/* Mobile Hamburger Menu */}
+      <div className="lg:hidden fixed top-4 left-4 z-[60]">
+        <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          <SheetTrigger asChild>
+            <Button variant="outline" size="icon" className="bg-slate-950 border-slate-800 text-white hover:bg-slate-900">
+              <Menu size={24} />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="p-0 w-64 border-r border-slate-800">
+            <SidebarContent 
+              role={role} 
+              userName={userName} 
+              location={location} 
+              onClose={() => setIsOpen(false)} 
+            />
+          </SheetContent>
+        </Sheet>
+      </div>
+    </>
   );
 };
 
