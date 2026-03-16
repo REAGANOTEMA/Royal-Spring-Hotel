@@ -1,3 +1,4 @@
+// src/pages/Profile.tsx
 "use client";
 
 import React, { useState, useEffect, ChangeEvent } from "react";
@@ -12,16 +13,21 @@ import {
   Camera,
   ShieldCheck,
   Target,
+  Lock,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { showSuccess } from "@/utils/toast";
+import { Input } from "@/components/ui/input";
+import { showSuccess, showError } from "@/utils/toast";
+import { changeUserEmail, changeUserPassword } from "@/lib/supabaseClient";
 
 const Profile: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [newEmail, setNewEmail] = useState<string>("");
+  const [newPassword, setNewPassword] = useState<string>("");
 
   useEffect(() => {
     const role = localStorage.getItem("userRole") || "staff";
@@ -46,6 +52,20 @@ const Profile: React.FC = () => {
     reader.readAsDataURL(file);
 
     showSuccess("Profile picture updated successfully!");
+  };
+
+  // Update email and/or password
+  const handleUpdateProfile = async () => {
+    try {
+      if (newEmail) await changeUserEmail(newEmail);
+      if (newPassword) await changeUserPassword(newPassword);
+      showSuccess("Profile updated successfully!");
+      setUser((prev: any) => ({ ...prev, email: newEmail || prev.email }));
+      setNewEmail("");
+      setNewPassword("");
+    } catch (err: any) {
+      showError(err.message || "Failed to update profile");
+    }
   };
 
   if (!user) return null;
@@ -79,23 +99,14 @@ const Profile: React.FC = () => {
                   {/* Upload button */}
                   <label className="absolute bottom-0 right-0 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors cursor-pointer">
                     <Camera size={18} />
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleUpload}
-                    />
+                    <input type="file" accept="image/*" className="hidden" onChange={handleUpload} />
                   </label>
                 </div>
 
                 <div className="flex-1 pb-2">
                   <h1 className="text-3xl font-black text-slate-900">{user.name}</h1>
-                  <p className="text-blue-600 font-bold tracking-widest uppercase text-sm">
-                    {user.role}
-                  </p>
+                  <p className="text-blue-600 font-bold tracking-widest uppercase text-sm">{user.role}</p>
                 </div>
-
-                <Button className="mb-2 bg-slate-900 hover:bg-black font-bold">Edit Profile</Button>
               </div>
 
               {/* Contact Info */}
@@ -130,63 +141,27 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
               </div>
+
+              {/* Update Email & Password */}
+              <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Input
+                  type="email"
+                  placeholder="New Email"
+                  value={newEmail}
+                  onChange={(e) => setNewEmail(e.target.value)}
+                />
+                <Input
+                  type="password"
+                  placeholder="New Password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </div>
+              <Button className="mt-4 bg-blue-700 hover:bg-blue-800 font-bold" onClick={handleUpdateProfile}>
+                <Lock size={18} className="mr-2" /> Update Profile
+              </Button>
             </CardContent>
           </Card>
-
-          {/* Payroll & Performance */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card className="border-none shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Banknote className="text-emerald-500" /> Payroll & Benefits
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between p-4 bg-emerald-50 rounded-xl border border-emerald-100">
-                  <span className="font-bold text-emerald-800">Net Salary</span>
-                  <span className="font-black text-emerald-700">UGX 1,200,000</span>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 bg-slate-50 rounded-xl">
-                    <p className="text-xs text-slate-500 font-bold uppercase">Advances</p>
-                    <p className="text-xl font-black text-rose-600">-UGX 0</p>
-                  </div>
-                  <div className="p-4 bg-slate-50 rounded-xl">
-                    <p className="text-xs text-slate-500 font-bold uppercase">Leave Days</p>
-                    <p className="text-xl font-black text-blue-600">14 Days</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-none shadow-lg">
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <Target className="text-blue-500" /> Performance Targets
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm font-bold">
-                    <span>Guest Satisfaction</span>
-                    <span className="text-blue-600">92%</span>
-                  </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-blue-600" style={{ width: "92%" }} />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <div className="flex justify-between text-sm font-bold">
-                    <span>Attendance Rate</span>
-                    <span className="text-emerald-600">100%</span>
-                  </div>
-                  <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500" style={{ width: "100%" }} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
         </div>
 
         <Footer />

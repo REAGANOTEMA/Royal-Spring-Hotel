@@ -1,11 +1,9 @@
-// src/supabaseClient.js
+// src/lib/supabaseClient.js
 import { createClient } from '@supabase/supabase-js'
 
-// 1️⃣ Your Supabase Project URL
-const supabaseUrl = 'https://royal-spring-hotel.supabase.co'
+// ✅ Use environment variables instead of hardcoding
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-// 2️⃣ Your Publishable Key (safe for frontend)
-const supabaseKey = 'sb_publishable_y-SSEqa4Mn6Pslu2wfAqJg_pw78sa7Z'
-
-// 3️⃣ Create Supabase client
+// 3️⃣ Create the Supabase client
 export const supabase = createClient(supabaseUrl, supabaseKey)
