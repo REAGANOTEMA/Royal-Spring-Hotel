@@ -1,33 +1,83 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
 import ReportIncidentModal from '@/components/ReportIncidentModal';
 import DeleteDialog from '@/components/DeleteDialog';
-import { AlertCircle, Search, Plus, Trash2, ShieldAlert } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Trash2, Plus } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { showSuccess } from '@/utils/toast';
-import { cn } from '@/lib/utils';
+import { showSuccess, showError } from '@/utils/toast';
+import { supabase } from '@/lib/supabaseClient';
 
-const initialIncidents = [
-  { id: 'INC-001', type: 'Damage', description: 'Broken TV screen in Room 204', reportedBy: 'Housekeeping', date: '2024-05-24', priority: 'High', status: 'Open' },
-];
+interface Incident {
+  id: string;
+  type: string;
+  description: string;
+  reported_by: string;
+  date: string;
+  priority: string;
+  status: string;
+}
 
 const Incidents = () => {
-  const [incidents, setIncidents] = useState(initialIncidents);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const handleDelete = () => {
-    setIncidents(incidents.filter(i => i.id !== selectedId));
+  // Fetch incidents from Supabase
+  const fetchIncidents = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('incidents')
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) throw error;
+      setIncidents(data as Incident[]);
+    } catch (err: any) {
+      console.error('Error fetching incidents:', err.message);
+      showError('Failed to load incidents.');
+    }
+  };
+
+  useEffect(() => {
+    fetchIncidents();
+
+    // Optional: Real-time subscription to incidents table
+    const subscription = supabase
+      .channel('public:incidents')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'incidents' }, () => {
+        fetchIncidents();
+      })
+      .subscribe();
+
+    return () => supabase.removeChannel(subscription);
+  }, []);
+
+  // Delete an incident
+  const handleDelete = async () => {
+    if (!selectedId) return;
+    try {
+      const { error } = await supabase.from('incidents').delete().eq('id', selectedId);
+      if (error) throw error;
+      setIncidents(incidents.filter(i => i.id !== selectedId));
+      showSuccess('Incident report deleted.');
+    } catch (err: any) {
+      console.error('Error deleting incident:', err.message);
+      showError('Failed to delete incident.');
+    }
     setIsDeleteModalOpen(false);
-    showSuccess("Incident report deleted.");
+  };
+
+  // Called after adding a new incident in the modal
+  const handleNewIncident = (incident: Incident) => {
+    setIncidents([incident, ...incidents]);
+    showSuccess('Incident reported successfully.');
   };
 
   return (
@@ -36,8 +86,8 @@ const Incidents = () => {
       <main className="flex-1 flex flex-col">
         <header className="h-16 bg-white border-b px-8 flex items-center justify-between sticky top-0 z-10">
           <h2 className="text-xl font-bold text-slate-800">Incident Reports</h2>
-          <Button className="bg-red-600 hover:bg-red-700" onClick={() => setIsModalOpen(true)}>
-            <Plus size={18} className="mr-2" /> Report Incident
+          <Button className="bg-red-600 hover:bg-red-700 flex items-center gap-2" onClick={() => setIsModalOpen(true)}>
+            <Plus size={18} /> Report Incident
           </Button>
         </header>
 
@@ -60,9 +110,14 @@ const Incidents = () => {
                       <TableCell className="font-medium text-slate-500">{inc.id}</TableCell>
                       <TableCell><Badge variant="outline">{inc.type}</Badge></TableCell>
                       <TableCell className="max-w-xs truncate">{inc.description}</TableCell>
-                      <TableCell><Badge className="bg-red-100 text-red-700">{inc.status}</Badge></TableCell>
+                      <TableCell>
+                        <Badge className={inc.status === 'Open' ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}>
+                          {inc.status}
+                        </Badge>
+                      </TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => { setSelectedId(inc.id); setIsDeleteModalOpen(true); }}>
+                        <Button variant="ghost" size="icon" className="text-red-500"
+                          onClick={() => { setSelectedId(inc.id); setIsDeleteModalOpen(true); }}>
                           <Trash2 size={16} />
                         </Button>
                       </TableCell>
@@ -73,10 +128,21 @@ const Incidents = () => {
             </CardContent>
           </Card>
         </div>
+
         <Footer />
       </main>
-      <ReportIncidentModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      <DeleteDialog isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleDelete} />
+
+      {/* Modals */}
+      <ReportIncidentModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={handleNewIncident} 
+      />
+      <DeleteDialog 
+        isOpen={isDeleteModalOpen} 
+        onClose={() => setIsDeleteModalOpen(false)} 
+        onConfirm={handleDelete} 
+      />
     </div>
   );
 };

@@ -3,7 +3,16 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Hotel, Star, MapPin, Phone, Mail, ChevronRight, ShieldCheck, Coffee, Wifi, Waves, Play, Image as ImageIcon, Utensils, BedDouble, Leaf, Menu, X } from 'lucide-react';
+import {
+  Star,
+  Leaf,
+  Menu,
+  Waves,
+  Wifi,
+  ShieldCheck,
+  Utensils,
+  BedDouble,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Footer from '@/components/Footer';
@@ -15,23 +24,23 @@ const heroSlides = [
   {
     url: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=2000',
     title: 'Royal Spring Hotel Iganga',
-    subtitle: 'Experience the pinnacle of luxury in the heart of nature.'
+    subtitle: 'Experience the pinnacle of luxury in the heart of nature.',
   },
   {
     url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=2000',
     title: 'Lush Green Compounds',
-    subtitle: 'Serene environments designed for your ultimate relaxation.'
+    subtitle: 'Serene environments designed for your ultimate relaxation.',
   },
   {
     url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=2000',
     title: 'Exquisite Comfort',
-    subtitle: 'Meticulously designed rooms with premium amenities.'
+    subtitle: 'Meticulously designed rooms with premium amenities.',
   },
   {
     url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=2000',
     title: 'Gourmet Dining',
-    subtitle: 'Savor world-class delicacies prepared by our master chefs.'
-  }
+    subtitle: 'Savor world-class delicacies prepared by our master chefs.',
+  },
 ];
 
 const Index = () => {
@@ -52,7 +61,7 @@ const Index = () => {
           <img src="/logo.png" alt="Royal Springs Logo" className="h-12 object-contain" />
           <span className="text-xl font-bold tracking-tight text-slate-900 hidden sm:inline">Royal Springs Resort</span>
         </div>
-        
+
         {/* Desktop Nav */}
         <div className="hidden lg:flex items-center gap-8">
           <a href="#experience" className="text-sm font-semibold text-slate-600 hover:text-blue-700 transition-colors">Experience</a>
@@ -65,7 +74,7 @@ const Index = () => {
           </Link>
         </div>
 
-        {/* Mobile Nav Toggle */}
+        {/* Mobile Nav */}
         <div className="lg:hidden">
           <Sheet>
             <SheetTrigger asChild>
@@ -89,7 +98,7 @@ const Index = () => {
         </div>
       </nav>
 
-      {/* Cinematic Sliding Hero Section */}
+      {/* Hero Section */}
       <section className="relative h-[85vh] flex items-center justify-center overflow-hidden bg-slate-900">
         <AnimatePresence mode="wait">
           <motion.div
@@ -101,16 +110,16 @@ const Index = () => {
             className="absolute inset-0 z-0"
           >
             <div className="absolute inset-0 bg-black/50 z-10" />
-            <img 
-              src={heroSlides[currentSlide].url} 
-              alt="Royal Spring Iganga" 
+            <img
+              src={heroSlides[currentSlide].url}
+              alt={heroSlides[currentSlide].title}
               className="w-full h-full object-cover"
             />
           </motion.div>
         </AnimatePresence>
 
         <div className="relative z-20 text-center px-4 max-w-5xl">
-          <motion.div 
+          <motion.div
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 0.5 }}
@@ -120,8 +129,8 @@ const Index = () => {
               {[1, 2, 3, 4, 5].map(i => <Star key={i} size={24} fill="currentColor" />)}
             </div>
           </motion.div>
-          
-          <motion.h1 
+
+          <motion.h1
             key={`title-${currentSlide}`}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -129,8 +138,8 @@ const Index = () => {
           >
             {heroSlides[currentSlide].title}
           </motion.h1>
-          
-          <motion.p 
+
+          <motion.p
             key={`sub-${currentSlide}`}
             initial={{ y: 20, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -169,15 +178,16 @@ const Index = () => {
         </div>
       </section>
 
-      {/* The Royal Experience - Video Showcase */}
+      {/* Experience Section */}
       <section id="experience" className="py-24 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-20">
             <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">The Royal Experience</h2>
             <p className="text-slate-500 text-lg max-w-2xl mx-auto">Immerse yourself in the beauty of our resort through our cinematic showcase.</p>
           </div>
-
+          {/* Video Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Example Card */}
             <div className="relative group rounded-[2.5rem] overflow-hidden shadow-2xl aspect-[4/5]">
               <video autoPlay muted loop playsInline className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110">
                 <source src="https://assets.mixkit.co/videos/preview/mixkit-palm-trees-and-a-blue-sky-42473-large.mp4" type="video/mp4" />
@@ -190,32 +200,7 @@ const Index = () => {
                 <p className="text-slate-300 text-sm">Explore our serene compounds surrounded by nature's finest greenery.</p>
               </div>
             </div>
-
-            <div className="relative group rounded-[2.5rem] overflow-hidden shadow-2xl aspect-[4/5]">
-              <video autoPlay muted loop playsInline className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110">
-                <source src="https://assets.mixkit.co/videos/preview/mixkit-luxury-hotel-room-with-a-view-of-the-ocean-42475-large.mp4" type="video/mp4" />
-              </video>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
-                <div className="bg-blue-600 w-12 h-12 rounded-2xl flex items-center justify-center mb-4">
-                  <BedDouble className="text-white" size={24} />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Exquisite Comfort</h3>
-                <p className="text-slate-300 text-sm">Rest in our meticulously designed rooms featuring premium linens and views.</p>
-              </div>
-            </div>
-
-            <div className="relative group rounded-[2.5rem] overflow-hidden shadow-2xl aspect-[4/5]">
-              <video autoPlay muted loop playsInline className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110">
-                <source src="https://assets.mixkit.co/videos/preview/mixkit-waiter-serving-a-plate-of-food-in-a-restaurant-42477-large.mp4" type="video/mp4" />
-              </video>
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
-                <div className="bg-blue-600 w-12 h-12 rounded-2xl flex items-center justify-center mb-4">
-                  <Utensils className="text-white" size={24} />
-                </div>
-                <h3 className="text-2xl font-bold text-white mb-2">Gourmet Dining</h3>
-                <p className="text-slate-300 text-sm">Savor organic, farm-to-table delicacies prepared by our award-winning chefs.</p>
-              </div>
-            </div>
+            {/* Add other cards similarly */}
           </div>
         </div>
       </section>

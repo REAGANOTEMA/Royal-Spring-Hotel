@@ -1,31 +1,31 @@
 "use client";
 
-import React from 'react';
-import { Hotel, MapPin, Clock, Briefcase, ChevronRight } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import Footer from '@/components/Footer';
+import React from "react";
+import { Hotel, MapPin, Clock, Briefcase } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import Footer from "@/components/Footer";
 
 const jobs = [
   { 
-    id: '1', 
-    title: 'Front Desk Agent', 
-    location: 'Royal Springs Resort, Uganda', 
-    type: 'Full-time', 
-    salary: 'UGX 800,000 - 1,200,000',
-    desc: 'We are looking for a professional Front Desk Agent to be the first point of contact for our guests.'
+    id: "1", 
+    title: "Front Desk Agent", 
+    location: "Royal Springs Resort, Uganda", 
+    type: "Full-time", 
+    salary: "UGX 800,000 - 1,200,000",
+    desc: "We are looking for a professional Front Desk Agent to be the first point of contact for our guests."
   },
   { 
-    id: '2', 
-    title: 'Housekeeping Supervisor', 
-    location: 'Royal Springs Resort, Uganda', 
-    type: 'Full-time', 
-    salary: 'UGX 900,000 - 1,100,000',
-    desc: 'Lead our housekeeping team to maintain the highest standards of cleanliness and guest satisfaction.'
+    id: "2", 
+    title: "Housekeeping Supervisor", 
+    location: "Royal Springs Resort, Uganda", 
+    type: "Full-time", 
+    salary: "UGX 900,000 - 1,100,000",
+    desc: "Lead our housekeeping team to maintain the highest standards of cleanliness and guest satisfaction."
   }
 ];
 
-const Careers = () => {
+const Careers: React.FC = () => {
   const jsonLd = {
     "@context": "https://schema.org/",
     "@type": "JobPosting",
@@ -67,7 +67,9 @@ const Careers = () => {
 
       <section className="bg-slate-900 text-white py-20 px-6 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-6">Join Our Royal Team</h1>
-        <p className="text-slate-400 text-lg max-w-2xl mx-auto">Build your career at Uganda's premier luxury resort. We are always looking for passionate individuals.</p>
+        <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+          Build your career at Uganda's premier luxury resort. We are always looking for passionate individuals.
+        </p>
       </section>
 
       <main className="flex-1 container mx-auto px-4 py-16 max-w-4xl space-y-8">
@@ -91,6 +93,7 @@ const Careers = () => {
           </Card>
         ))}
       </main>
+
       <Footer />
     </div>
   );

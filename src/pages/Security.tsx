@@ -11,7 +11,16 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
-const auditLogs = [
+interface AuditLog {
+  id: string;
+  user: string;
+  action: string;
+  ip: string;
+  time: string;
+  status: 'Authorized' | 'Blocked';
+}
+
+const initialAuditLogs: AuditLog[] = [
   { id: 'LOG-8821', user: 'Joseph Byabazaire', action: 'Accessed Financial Reports', ip: '192.168.1.1', time: '2 mins ago', status: 'Authorized' },
   { id: 'LOG-8820', user: 'Alice Johnson', action: 'Updated Room 204 Status', ip: '192.168.1.45', time: '15 mins ago', status: 'Authorized' },
   { id: 'LOG-8819', user: 'Unknown', action: 'Failed Login Attempt', ip: '45.12.88.12', time: '1 hour ago', status: 'Blocked' },
@@ -19,7 +28,18 @@ const auditLogs = [
   { id: 'LOG-8817', user: 'HR Manager', action: 'Modified Payroll for May', ip: '192.168.1.5', time: '5 hours ago', status: 'Authorized' },
 ];
 
-const Security = () => {
+const Security: React.FC = () => {
+  const [auditLogs, setAuditLogs] = useState<AuditLog[]>(initialAuditLogs);
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Filter logs by search term
+  const filteredLogs = auditLogs.filter(log =>
+    log.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    log.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    log.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    log.ip.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
@@ -52,6 +72,7 @@ const Security = () => {
                 </div>
               </CardContent>
             </Card>
+
             <Card className="border-none shadow-lg bg-white overflow-hidden">
               <div className="h-1 bg-amber-500 w-full" />
               <CardContent className="p-6 flex items-center gap-4">
@@ -62,6 +83,7 @@ const Security = () => {
                 </div>
               </CardContent>
             </Card>
+
             <Card className="border-none shadow-lg bg-white overflow-hidden">
               <div className="h-1 bg-blue-500 w-full" />
               <CardContent className="p-6 flex items-center gap-4">
@@ -81,7 +103,12 @@ const Security = () => {
                 <CardTitle className="text-xl font-bold">System Audit Trail</CardTitle>
                 <div className="relative w-80">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                  <Input className="pl-10 h-11 bg-slate-50 border-none" placeholder="Search logs..." />
+                  <Input 
+                    className="pl-10 h-11 bg-slate-50 border-none"
+                    placeholder="Search logs..."
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                  />
                 </div>
               </div>
             </CardHeader>
@@ -98,7 +125,7 @@ const Security = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {auditLogs.map((log) => (
+                  {filteredLogs.map((log) => (
                     <TableRow key={log.id} className="hover:bg-slate-50/50 transition-colors">
                       <TableCell className="px-8 font-mono text-xs text-slate-500">{log.id}</TableCell>
                       <TableCell className="font-bold text-slate-900">{log.user}</TableCell>

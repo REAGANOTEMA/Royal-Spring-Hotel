@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import Sidebar from '@/components/Sidebar';
-import Footer from '@/components/Footer';
+import React, { useEffect, useState } from "react";
+import Sidebar from "@/components/Sidebar";
+import Footer from "@/components/Footer";
 import { 
   TrendingUp, 
   Users, 
@@ -17,7 +17,7 @@ import {
   CheckCircle2,
   UserCheck,
   Activity
-} from 'lucide-react';
+} from "lucide-react";
 import { 
   BarChart, 
   Bar, 
@@ -28,58 +28,59 @@ import {
   ResponsiveContainer,
   AreaChart,
   Area
-} from 'recharts';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { cn } from '@/lib/utils';
-import { showSuccess } from '@/utils/toast';
+} from "recharts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
+import { showSuccess } from "@/utils/toast";
 
+// Sample data for charts and activities
 const data = [
-  { name: 'Mon', revenue: 4000, bookings: 24 },
-  { name: 'Tue', revenue: 3000, bookings: 18 },
-  { name: 'Wed', revenue: 2000, bookings: 15 },
-  { name: 'Thu', revenue: 2780, bookings: 20 },
-  { name: 'Fri', revenue: 1890, bookings: 12 },
-  { name: 'Sat', revenue: 2390, bookings: 22 },
-  { name: 'Sun', revenue: 3490, bookings: 28 },
+  { name: "Mon", revenue: 4000, bookings: 24 },
+  { name: "Tue", revenue: 3000, bookings: 18 },
+  { name: "Wed", revenue: 2000, bookings: 15 },
+  { name: "Thu", revenue: 2780, bookings: 20 },
+  { name: "Fri", revenue: 1890, bookings: 12 },
+  { name: "Sat", revenue: 2390, bookings: 22 },
+  { name: "Sun", revenue: 3490, bookings: 28 }
 ];
 
 const activities = [
-  { id: 1, user: 'Alice J.', action: 'Checked in Guest #BK-1005', time: '2 mins ago', type: 'booking' },
-  { id: 2, user: 'System', action: 'Inventory Alert: Mineral Water Low', time: '15 mins ago', type: 'alert' },
-  { id: 3, user: 'Bob W.', action: 'Recorded Expense: UGX 120,000', time: '1 hour ago', type: 'finance' },
-  { id: 4, user: 'Joseph B.', action: 'Approved Leave for Sarah S.', time: '3 hours ago', type: 'hr' },
+  { id: 1, user: "Alice J.", action: "Checked in Guest #BK-1005", time: "2 mins ago", type: "booking" },
+  { id: 2, user: "System", action: "Inventory Alert: Mineral Water Low", time: "15 mins ago", type: "alert" },
+  { id: 3, user: "Bob W.", action: "Recorded Expense: UGX 120,000", time: "1 hour ago", type: "finance" },
+  { id: 4, user: "Joseph B.", action: "Approved Leave for Sarah S.", time: "3 hours ago", type: "hr" }
 ];
 
-const Dashboard = () => {
+const Dashboard: React.FC = () => {
   const [role, setRole] = useState<string | null>(null);
   const [isClockedIn, setIsClockedIn] = useState(false);
   const [clockInTime, setClockInTime] = useState<string | null>(null);
 
   useEffect(() => {
-    const savedRole = localStorage.getItem('userRole') || 'staff';
+    const savedRole = localStorage.getItem("userRole") || "staff";
     setRole(savedRole);
-    const savedClockIn = localStorage.getItem('clockInTime');
+    const savedClockIn = localStorage.getItem("clockInTime");
     if (savedClockIn) {
       setClockInTime(savedClockIn);
       setIsClockedIn(true);
     }
   }, []);
 
-  const handleClockAction = async () => {
+  const handleClockAction = () => {
     const now = new Date();
     const timeString = now.toLocaleTimeString();
     if (!isClockedIn) {
       setClockInTime(timeString);
       setIsClockedIn(true);
-      localStorage.setItem('clockInTime', timeString);
+      localStorage.setItem("clockInTime", timeString);
       showSuccess(`Clocked in successfully at ${timeString}`);
     } else {
       setIsClockedIn(false);
       setClockInTime(null);
-      localStorage.removeItem('clockInTime');
+      localStorage.removeItem("clockInTime");
       showSuccess(`Clocked out successfully at ${timeString}. Work session recorded.`);
     }
   };
@@ -88,14 +89,14 @@ const Dashboard = () => {
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 flex flex-col">
+        {/* Header */}
         <header className="h-16 bg-white border-b px-8 flex items-center justify-between sticky top-0 z-10">
           <h2 className="text-xl font-bold text-slate-800">
-            {role === 'director' ? 'Director Control Panel' : 
-             role === 'hr' ? 'HR Management Hub' : 'Staff Portal'}
+            {role === "director" ? "Director Control Panel" : role === "hr" ? "HR Management Hub" : "Staff Portal"}
           </h2>
           <div className="flex items-center gap-4">
-            {role === 'staff' && (
-              <Button 
+            {role === "staff" && (
+              <Button
                 onClick={handleClockAction}
                 variant={isClockedIn ? "destructive" : "default"}
                 className={cn("h-9", !isClockedIn && "bg-green-600 hover:bg-green-700")}
@@ -131,10 +132,12 @@ const Dashboard = () => {
             </Card>
           </div>
 
+          {/* Charts and Activity */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Performance Chart */}
             <Card className="lg:col-span-2 shadow-md border-none">
-              <CardHeader><CardTitle className="text-lg">Performance Overview</CardTitle></CardHeader>
+              <CardHeader>
+                <CardTitle className="text-lg">Performance Overview</CardTitle>
+              </CardHeader>
               <CardContent className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <AreaChart data={data}>
@@ -148,7 +151,6 @@ const Dashboard = () => {
               </CardContent>
             </Card>
 
-            {/* Recent Activity Feed */}
             <Card className="shadow-md border-none">
               <CardHeader className="flex flex-row items-center justify-between">
                 <CardTitle className="text-lg">Recent Activity</CardTitle>
@@ -158,12 +160,18 @@ const Dashboard = () => {
                 <div className="space-y-6">
                   {activities.map((act) => (
                     <div key={act.id} className="flex gap-3 relative">
-                      <div className={cn(
-                        "w-2 h-2 rounded-full mt-1.5 shrink-0",
-                        act.type === 'booking' ? "bg-green-500" :
-                        act.type === 'alert' ? "bg-red-500" :
-                        act.type === 'finance' ? "bg-blue-500" : "bg-purple-500"
-                      )} />
+                      <div
+                        className={cn(
+                          "w-2 h-2 rounded-full mt-1.5 shrink-0",
+                          act.type === "booking"
+                            ? "bg-green-500"
+                            : act.type === "alert"
+                            ? "bg-red-500"
+                            : act.type === "finance"
+                            ? "bg-blue-500"
+                            : "bg-purple-500"
+                        )}
+                      />
                       <div>
                         <p className="text-sm font-bold text-slate-900">{act.user}</p>
                         <p className="text-xs text-slate-500 leading-relaxed">{act.action}</p>
@@ -172,11 +180,14 @@ const Dashboard = () => {
                     </div>
                   ))}
                 </div>
-                <Button variant="ghost" className="w-full mt-6 text-blue-600 font-bold text-xs">View All Activity</Button>
+                <Button variant="ghost" className="w-full mt-6 text-blue-600 font-bold text-xs">
+                  View All Activity
+                </Button>
               </CardContent>
             </Card>
           </div>
         </div>
+
         <Footer />
       </main>
     </div>

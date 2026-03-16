@@ -1,34 +1,83 @@
 "use client";
 
-import React, { useState } from 'react';
-import Sidebar from '@/components/Sidebar';
-import Footer from '@/components/Footer';
-import BookingModal from '@/components/BookingModal';
-import DeleteDialog from '@/components/DeleteDialog';
-import { Calendar as CalendarIcon, Search, Plus, Filter, Trash2, CheckCircle2, Clock, XCircle } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { showSuccess } from '@/utils/toast';
-import { cn } from '@/lib/utils';
+import React, { useState, useEffect } from "react";
+import { supabase } from "../supabaseClient"; // Make sure the path is correct
+import Sidebar from "@/components/Sidebar";
+import Footer from "@/components/Footer";
+import BookingModal from "@/components/BookingModal";
+import DeleteDialog from "@/components/DeleteDialog";
+import {
+  Calendar as CalendarIcon,
+  Search,
+  Plus,
+  Filter,
+  Trash2,
+  CheckCircle2,
+  Clock,
+  XCircle,
+} from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { showSuccess } from "@/utils/toast";
+import { cn } from "@/lib/utils";
 
-const initialBookings = [
-  { id: 'BK-1001', guest: 'John Doe', room: '204', type: 'Deluxe', checkIn: '2024-05-20', checkOut: '2024-05-23', status: 'Confirmed', amount: '750,000' },
-  { id: 'BK-1002', guest: 'Sarah Smith', room: '105', type: 'Standard', checkIn: '2024-05-21', checkOut: '2024-05-22', status: 'Checked In', amount: '150,000' },
-];
+interface Booking {
+  id: string;
+  guest: string;
+  room: string;
+  status: string;
+  amount: string;
+  checkIn?: string;
+  checkOut?: string;
+  type?: string;
+}
 
-const Bookings = () => {
-  const [bookings, setBookings] = useState(initialBookings);
+const Bookings: React.FC = () => {
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const handleDelete = () => {
-    setBookings(bookings.filter(b => b.id !== selectedId));
-    setIsDeleteModalOpen(false);
-    showSuccess("Reservation deleted.");
+  // Fetch bookings from Supabase on mount
+  useEffect(() => {
+    const fetchBookings = async () => {
+      const { data, error } = await supabase
+        .from("bookings") // replace with your Supabase table name
+        .select("*")
+        .order("checkIn", { ascending: false });
+
+      if (error) console.error("Error fetching bookings:", error);
+      else setBookings(data as Booking[]);
+    };
+
+    fetchBookings();
+  }, []);
+
+  // Delete booking from Supabase
+  const handleDelete = async () => {
+    if (!selectedId) return;
+
+    const { error } = await supabase
+      .from("bookings")
+      .delete()
+      .eq("id", selectedId);
+
+    if (error) console.error("Error deleting booking:", error);
+    else {
+      setBookings(bookings.filter((b) => b.id !== selectedId));
+      setIsDeleteModalOpen(false);
+      showSuccess("Reservation deleted.");
+    }
   };
 
   return (
@@ -37,7 +86,10 @@ const Bookings = () => {
       <main className="flex-1 flex flex-col">
         <header className="h-16 bg-white border-b px-8 flex items-center justify-between sticky top-0 z-10">
           <h2 className="text-xl font-bold text-slate-800">Reservations & Bookings</h2>
-          <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => setIsModalOpen(true)}>
+          <Button
+            className="bg-blue-600 hover:bg-blue-700"
+            onClick={() => setIsModalOpen(true)}
+          >
             <Plus size={18} className="mr-2" /> New Reservation
           </Button>
         </header>
@@ -63,16 +115,30 @@ const Bookings = () => {
                       <TableCell className="font-semibold">{booking.guest}</TableCell>
                       <TableCell>Room {booking.room}</TableCell>
                       <TableCell>
-                        <Badge className={cn(
-                          "px-2 py-0.5",
-                          booking.status === 'Confirmed' ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
-                        )}>
+                        <Badge
+                          className={cn(
+                            "px-2 py-0.5 font-medium rounded-full",
+                            booking.status === "Confirmed"
+                              ? "bg-green-100 text-green-700"
+                              : booking.status === "Checked In"
+                              ? "bg-blue-100 text-blue-700"
+                              : "bg-gray-100 text-gray-700"
+                          )}
+                        >
                           {booking.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right font-bold">{booking.amount}</TableCell>
                       <TableCell className="text-right">
-                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => { setSelectedId(booking.id); setIsDeleteModalOpen(true); }}>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="text-red-500"
+                          onClick={() => {
+                            setSelectedId(booking.id);
+                            setIsDeleteModalOpen(true);
+                          }}
+                        >
                           <Trash2 size={16} />
                         </Button>
                       </TableCell>
@@ -83,10 +149,24 @@ const Bookings = () => {
             </CardContent>
           </Card>
         </div>
+
         <Footer />
       </main>
-      <BookingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
-      <DeleteDialog isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleDelete} />
+
+      {/* Booking Modal */}
+      <BookingModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        setBookings={setBookings}
+        bookings={bookings}
+      />
+
+      {/* Delete Confirmation */}
+      <DeleteDialog
+        isOpen={isDeleteModalOpen}
+        onClose={() => setIsDeleteModalOpen(false)}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 };

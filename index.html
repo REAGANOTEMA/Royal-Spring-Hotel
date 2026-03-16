@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -21,13 +21,19 @@
     }
     </script>
 
-    <!-- Optional: SEO meta tags -->
+    <!-- SEO meta tags -->
     <meta name="description" content="Royal Spring Hotel – Luxury Resort with premium rooms, bookings, and services." />
     <meta name="keywords" content="Royal Spring Hotel, luxury resort, rooms, bookings, ERP system" />
+
+    <!-- Tailwind / global styles (imported via Vite or bundler) -->
+    <link rel="stylesheet" href="/globals.css" />
   </head>
 
-  <body>
+  <body class="bg-slate-50">
+    <!-- React app root -->
     <div id="root"></div>
+
+    <!-- Main entry point for React + Vite -->
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

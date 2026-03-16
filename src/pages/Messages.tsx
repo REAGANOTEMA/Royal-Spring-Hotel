@@ -1,47 +1,106 @@
 "use client";
 
-import React, { useState } from 'react';
-import Sidebar from '@/components/Sidebar';
-import Footer from '@/components/Footer';
-import { MessageSquare, Search, Send, User, Bot, CheckCircle2, Clock } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import React, { useState, useEffect, useRef } from "react";
+import Sidebar from "@/components/Sidebar";
+import Footer from "@/components/Footer";
+import { MessageSquare, Search, Send, User, Bot, Clock } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { supabase } from "@/lib/supabaseClient";
 
-const initialMessages = [
-  { id: 1, guest: 'John Doe', lastMsg: 'What time is breakfast?', time: '10:30 AM', status: 'Unread', history: [
-    { role: 'user', text: 'What time is breakfast?' }
-  ]},
-  { id: 2, guest: 'Sarah Smith', lastMsg: 'Can I get extra towels?', time: '09:15 AM', status: 'Replied', history: [
-    { role: 'user', text: 'Can I get extra towels?' },
-    { role: 'bot', text: 'Of course! Housekeeping has been notified.' }
-  ]},
-];
+type MessageHistory = { role: "user" | "bot" | "staff"; text: string };
+type Chat = {
+  id: number;
+  guest: string;
+  lastMsg: string;
+  time: string;
+  status: string;
+  history: MessageHistory[];
+};
 
 const Messages = () => {
-  const [selectedChat, setSelectedChat] = useState<any>(initialMessages[0]);
-  const [reply, setReply] = useState('');
+  const [messages, setMessages] = useState<Chat[]>([]);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [reply, setReply] = useState("");
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
-  const handleSend = () => {
-    if (!reply.trim()) return;
-    // Simulate sending
-    setSelectedChat({
+  // Load messages from Supabase on mount
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const { data, error } = await supabase.from("guest_messages").select("*").order("id", { ascending: true });
+      if (error) {
+        console.error("Failed to fetch messages:", error.message);
+        return;
+      }
+      // Convert Supabase rows to Chat type
+      const chats: Chat[] = data.map((row: any) => ({
+        id: row.id,
+        guest: row.guest_name,
+        lastMsg: row.last_message,
+        time: row.time,
+        status: row.status,
+        history: row.history || [],
+      }));
+      setMessages(chats);
+      if (chats.length > 0) setSelectedChat(chats[0]);
+    };
+    fetchMessages();
+
+    // Optional: Subscribe to live updates
+    const subscription = supabase
+      .channel("public:guest_messages")
+      .on("postgres_changes", { event: "*", schema: "public", table: "guest_messages" }, (payload) => {
+        fetchMessages();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, []);
+
+  const handleSend = async () => {
+    if (!reply.trim() || !selectedChat) return;
+
+    const updatedChat: Chat = {
       ...selectedChat,
-      history: [...selectedChat.history, { role: 'staff', text: reply }],
-      status: 'Replied'
-    });
-    setReply('');
+      history: [...selectedChat.history, { role: "staff", text: reply }],
+      lastMsg: reply,
+      status: "Replied",
+    };
+
+    setSelectedChat(updatedChat);
+    setMessages(messages.map((m) => (m.id === selectedChat.id ? updatedChat : m)));
+    setReply("");
+
+    // Scroll to bottom
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+
+    // Persist to Supabase
+    const { error } = await supabase
+      .from("guest_messages")
+      .update({
+        last_message: reply,
+        status: "Replied",
+        history: updatedChat.history,
+      })
+      .eq("id", selectedChat.id);
+    if (error) console.error("Failed to update message:", error.message);
   };
 
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 flex flex-col">
+        {/* Header */}
         <header className="h-16 bg-white border-b px-8 flex items-center justify-between sticky top-0 z-10">
           <h2 className="text-xl font-bold text-slate-800">Guest Inquiries Inbox</h2>
-          <Badge className="bg-blue-100 text-blue-700 font-bold">3 New Messages</Badge>
+          <Badge className="bg-blue-100 text-blue-700 font-bold">
+            {messages.filter((m) => m.status === "Unread").length} New Messages
+          </Badge>
         </header>
 
         <div className="flex-1 flex overflow-hidden">
@@ -54,7 +113,7 @@ const Messages = () => {
               </div>
             </div>
             <div className="flex-1 overflow-y-auto">
-              {initialMessages.map((chat) => (
+              {messages.map((chat) => (
                 <button
                   key={chat.id}
                   onClick={() => setSelectedChat(chat)}
@@ -82,6 +141,7 @@ const Messages = () => {
           <div className="flex-1 flex flex-col bg-slate-50">
             {selectedChat ? (
               <>
+                {/* Chat Header */}
                 <div className="p-4 bg-white border-b flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -96,33 +156,45 @@ const Messages = () => {
                   </div>
                   <Button variant="outline" size="sm">View Guest Profile</Button>
                 </div>
+
+                {/* Chat Messages */}
                 <div className="flex-1 overflow-y-auto p-6 space-y-4">
-                  {selectedChat.history.map((msg: any, i: number) => (
-                    <div key={i} className={cn(
-                      "flex gap-3 max-w-[70%]",
-                      msg.role === 'user' ? "mr-auto" : "ml-auto flex-row-reverse"
-                    )}>
-                      <div className={cn(
-                        "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                        msg.role === 'user' ? "bg-slate-200" : "bg-blue-600 text-white"
-                      )}>
-                        {msg.role === 'user' ? <User size={14} /> : <Bot size={14} />}
+                  {selectedChat.history.map((msg, i) => (
+                    <div
+                      key={i}
+                      className={cn(
+                        "flex gap-3 max-w-[70%]",
+                        msg.role === "user" ? "mr-auto" : "ml-auto flex-row-reverse"
+                      )}
+                    >
+                      <div
+                        className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
+                          msg.role === "user" ? "bg-slate-200" : "bg-blue-600 text-white"
+                        )}
+                      >
+                        {msg.role === "user" ? <User size={14} /> : <Bot size={14} />}
                       </div>
-                      <div className={cn(
-                        "p-3 rounded-2xl text-sm shadow-sm",
-                        msg.role === 'user' ? "bg-white text-slate-800 rounded-tl-none" : "bg-blue-600 text-white rounded-tr-none"
-                      )}>
+                      <div
+                        className={cn(
+                          "p-3 rounded-2xl text-sm shadow-sm",
+                          msg.role === "user" ? "bg-white text-slate-800 rounded-tl-none" : "bg-blue-600 text-white rounded-tr-none"
+                        )}
+                      >
                         {msg.text}
                       </div>
                     </div>
                   ))}
+                  <div ref={chatEndRef} />
                 </div>
+
+                {/* Chat Input */}
                 <div className="p-4 bg-white border-t flex gap-3">
-                  <Input 
-                    placeholder="Type your response..." 
+                  <Input
+                    placeholder="Type your response..."
                     value={reply}
                     onChange={(e) => setReply(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+                    onKeyDown={(e) => e.key === "Enter" && handleSend()}
                     className="flex-1 h-12"
                   />
                   <Button onClick={handleSend} className="bg-blue-700 hover:bg-blue-800 h-12 px-6 font-bold">
@@ -138,6 +210,7 @@ const Messages = () => {
             )}
           </div>
         </div>
+
         <Footer />
       </main>
     </div>

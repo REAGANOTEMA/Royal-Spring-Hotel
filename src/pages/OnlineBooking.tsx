@@ -1,17 +1,25 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Hotel, Calendar, Users, CreditCard, CheckCircle2, ChevronLeft, ShieldCheck } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { showSuccess, showLoading, dismissToast } from '@/utils/toast';
-import Footer from '@/components/Footer';
-import { cn } from '@/lib/utils';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import {
+  Hotel,
+  Calendar,
+  Users,
+  CreditCard,
+  CheckCircle2,
+  ChevronLeft,
+  ShieldCheck,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import Footer from "@/components/Footer";
+import { showSuccess, showLoading, dismissToast } from "@/utils/toast";
+import { cn } from "@/lib/utils";
 
-const OnlineBooking = () => {
+const OnlineBooking: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -23,21 +31,27 @@ const OnlineBooking = () => {
     } else {
       setIsProcessing(true);
       const loadingId = showLoading("Processing secure payment...");
-      
+
       // Simulate payment processing delay
-      await new Promise(resolve => setTimeout(resolve, 2500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 2500));
+
       dismissToast(loadingId);
-      showSuccess("Payment of UGX 775,000 successful! Funds transferred to Royal Springs Merchant Account.");
+      showSuccess(
+        "Payment of UGX 775,000 successful! Funds transferred to Royal Springs Merchant Account."
+      );
       setIsProcessing(false);
-      navigate('/');
+      navigate("/");
     }
   };
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-50">
+      {/* Navigation / Progress */}
       <nav className="h-16 border-b bg-white px-6 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+        <div
+          className="flex items-center gap-2 cursor-pointer"
+          onClick={() => navigate("/")}
+        >
           <div className="bg-blue-600 p-1.5 rounded-lg text-white">
             <Hotel size={20} />
           </div>
@@ -46,11 +60,13 @@ const OnlineBooking = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             {[1, 2, 3].map((i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className={cn(
                   "w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
-                  step >= i ? "bg-blue-600 text-white" : "bg-slate-200 text-slate-500"
+                  step >= i
+                    ? "bg-blue-600 text-white"
+                    : "bg-slate-200 text-slate-500"
                 )}
               >
                 {i}
@@ -60,11 +76,12 @@ const OnlineBooking = () => {
         </div>
       </nav>
 
+      {/* Main Form */}
       <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="mb-6 text-slate-500 hover:text-slate-900"
-          onClick={() => step > 1 ? setStep(step - 1) : navigate('/')}
+          onClick={() => (step > 1 ? setStep(step - 1) : navigate("/"))}
           disabled={isProcessing}
         >
           <ChevronLeft size={18} className="mr-1" /> Back
@@ -85,20 +102,27 @@ const OnlineBooking = () => {
           </CardHeader>
           <CardContent className="p-8">
             <form onSubmit={handleBooking} className="space-y-6">
+              {/* Step 1: Select Stay */}
               {step === 1 && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label>Check-in Date</Label>
                       <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <Calendar
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                          size={18}
+                        />
                         <Input type="date" className="pl-10" required />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label>Check-out Date</Label>
                       <div className="relative">
-                        <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                        <Calendar
+                          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                          size={18}
+                        />
                         <Input type="date" className="pl-10" required />
                       </div>
                     </div>
@@ -106,9 +130,21 @@ const OnlineBooking = () => {
                   <div className="space-y-2">
                     <Label>Room Type</Label>
                     <div className="grid grid-cols-1 gap-3">
-                      {['Standard Room - UGX 150,000', 'Deluxe Suite - UGX 250,000', 'Presidential Suite - UGX 450,000'].map((room) => (
-                        <label key={room} className="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-blue-50 transition-colors border-slate-200 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50">
-                          <input type="radio" name="room" className="w-4 h-4 text-blue-600" required />
+                      {[
+                        "Standard Room - UGX 150,000",
+                        "Deluxe Suite - UGX 250,000",
+                        "Presidential Suite - UGX 450,000",
+                      ].map((room) => (
+                        <label
+                          key={room}
+                          className="flex items-center p-4 border rounded-xl cursor-pointer hover:bg-blue-50 transition-colors border-slate-200 has-[:checked]:border-blue-600 has-[:checked]:bg-blue-50"
+                        >
+                          <input
+                            type="radio"
+                            name="room"
+                            className="w-4 h-4 text-blue-600"
+                            required
+                          />
                           <span className="ml-3 font-medium text-slate-700">{room}</span>
                         </label>
                       ))}
@@ -117,6 +153,7 @@ const OnlineBooking = () => {
                 </div>
               )}
 
+              {/* Step 2: Guest Info */}
               {step === 2 && (
                 <div className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -140,6 +177,7 @@ const OnlineBooking = () => {
                 </div>
               )}
 
+              {/* Step 3: Payment */}
               {step === 3 && (
                 <div className="space-y-6">
                   <div className="bg-slate-900 text-white p-6 rounded-xl space-y-4 shadow-inner">
@@ -162,12 +200,14 @@ const OnlineBooking = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="space-y-4">
                     <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg flex items-start gap-3">
                       <ShieldCheck className="text-blue-600 mt-0.5" size={20} />
                       <p className="text-xs text-blue-800 leading-relaxed">
-                        Your payment is encrypted and processed directly to the Royal Springs Resort merchant account. We do not store your full card details.
+                        Your payment is encrypted and processed directly to the Royal
+                        Springs Resort merchant account. We do not store your full card
+                        details.
                       </p>
                     </div>
                     <div className="space-y-2">
@@ -188,8 +228,8 @@ const OnlineBooking = () => {
                 </div>
               )}
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full h-14 text-lg font-bold bg-blue-600 hover:bg-blue-700 rounded-xl transition-all active:scale-[0.98]"
                 disabled={isProcessing}
               >
@@ -198,8 +238,10 @@ const OnlineBooking = () => {
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     Processing...
                   </span>
+                ) : step === 3 ? (
+                  "Pay & Confirm Booking"
                 ) : (
-                  step === 3 ? "Pay & Confirm Booking" : "Continue to Next Step"
+                  "Continue to Next Step"
                 )}
               </Button>
             </form>

@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { supabase } from '../supabaseClient'; // Make sure path is correct
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
 import DeleteDialog from '@/components/DeleteDialog';
@@ -15,38 +16,62 @@ import { Label } from '@/components/ui/label';
 import { showSuccess } from '@/utils/toast';
 import { cn } from '@/lib/utils';
 
-const initialBilling = [
-  { id: 'INV-2024-001', guest: 'John Doe', room: '204', amount: '850,000', status: 'Paid', date: '2024-05-24' },
-  { id: 'INV-2024-002', guest: 'Sarah Smith', room: '105', amount: '150,000', status: 'Pending', date: '2024-05-24' },
-];
-
 const Billing = () => {
-  const [invoices, setInvoices] = useState(initialBilling);
+  const [invoices, setInvoices] = useState<any[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newInvoice, setNewInvoice] = useState({ guest: '', room: '', amount: '' });
 
-  const handleAddInvoice = (e: React.FormEvent) => {
+  // Fetch invoices from Supabase on mount
+  useEffect(() => {
+    const fetchInvoices = async () => {
+      const { data, error } = await supabase
+        .from('billing') // replace with your table name
+        .select('*')
+        .order('date', { ascending: false });
+
+      if (error) console.error('Error fetching invoices:', error);
+      else setInvoices(data);
+    };
+
+    fetchInvoices();
+  }, []);
+
+  // Add new invoice to Supabase
+  const handleAddInvoice = async (e: React.FormEvent) => {
     e.preventDefault();
+
     const invoiceToAdd = {
-      id: `INV-2024-00${invoices.length + 1}`,
       guest: newInvoice.guest,
       room: newInvoice.room,
       amount: newInvoice.amount,
       status: 'Pending',
-      date: new Date().toISOString().split('T')[0]
+      date: new Date().toISOString().split('T')[0],
     };
-    setInvoices([invoiceToAdd, ...invoices]);
-    setIsAddModalOpen(false);
-    showSuccess(`Invoice created for ${newInvoice.guest}.`);
-    setNewInvoice({ guest: '', room: '', amount: '' });
+
+    const { data, error } = await supabase.from('billing').insert([invoiceToAdd]);
+
+    if (error) {
+      console.error('Error adding invoice:', error);
+    } else {
+      setInvoices([data[0], ...invoices]);
+      setIsAddModalOpen(false);
+      showSuccess(`Invoice created for ${newInvoice.guest}.`);
+      setNewInvoice({ guest: '', room: '', amount: '' });
+    }
   };
 
-  const handleDelete = () => {
-    setInvoices(invoices.filter(inv => inv.id !== selectedId));
-    setIsDeleteModalOpen(false);
-    showSuccess("Invoice deleted.");
+  // Delete invoice from Supabase
+  const handleDelete = async () => {
+    const { error } = await supabase.from('billing').delete().eq('id', selectedId);
+
+    if (error) console.error('Error deleting invoice:', error);
+    else {
+      setInvoices(invoices.filter(inv => inv.id !== selectedId));
+      setIsDeleteModalOpen(false);
+      showSuccess("Invoice deleted.");
+    }
   };
 
   const handlePrint = (id: string) => {
@@ -123,16 +148,16 @@ const Billing = () => {
             <form onSubmit={handleAddInvoice} className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Guest Name</Label>
-                <Input value={newInvoice.guest} onChange={e => setNewInvoice({...newInvoice, guest: e.target.value})} required />
+                <Input value={newInvoice.guest} onChange={e => setNewInvoice({ ...newInvoice, guest: e.target.value })} required />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Room Number</Label>
-                  <Input value={newInvoice.room} onChange={e => setNewInvoice({...newInvoice, room: e.target.value})} required />
+                  <Input value={newInvoice.room} onChange={e => setNewInvoice({ ...newInvoice, room: e.target.value })} required />
                 </div>
                 <div className="space-y-2">
                   <Label>Total Amount (UGX)</Label>
-                  <Input value={newInvoice.amount} onChange={e => setNewInvoice({...newInvoice, amount: e.target.value})} required />
+                  <Input value={newInvoice.amount} onChange={e => setNewInvoice({ ...newInvoice, amount: e.target.value })} required />
                 </div>
               </div>
               <DialogFooter>

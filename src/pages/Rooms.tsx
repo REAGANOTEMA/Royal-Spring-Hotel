@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
 import DeleteDialog from '@/components/DeleteDialog';
-import { Bed, Search, Plus, Trash2, Camera, Edit3 } from 'lucide-react';
+import { Bed, Plus, Trash2, Edit3, Camera } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,30 +15,55 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { showSuccess } from '@/utils/toast';
 import { cn } from '@/lib/utils';
 
-const initialRooms = [
+interface RoomType {
+  id: string;
+  type: string;
+  price: string;
+  status: string;
+  floor: string;
+  image: string;
+}
+
+const initialRooms: RoomType[] = [
   { id: '101', type: 'Standard', price: '150,000', status: 'Available', floor: '1st Floor', image: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=400' },
   { id: '102', type: 'Standard', price: '150,000', status: 'Occupied', floor: '1st Floor', image: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=400' },
   { id: '201', type: 'Deluxe', price: '250,000', status: 'Cleaning', floor: '2nd Floor', image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&q=80&w=400' },
 ];
 
-const Rooms = () => {
-  const [rooms, setRooms] = useState(initialRooms);
+const Rooms: React.FC = () => {
+  const [rooms, setRooms] = useState<RoomType[]>(initialRooms);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const [newRoom, setNewRoom] = useState({ id: '', type: 'Standard', price: '', floor: '1st Floor' });
+  const [newRoom, setNewRoom] = useState<Partial<RoomType>>({ id: '', type: 'Standard', price: '', floor: '1st Floor', image: '' });
+
+  // Handle room image upload from device
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        setNewRoom({ ...newRoom, image: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const handleAddRoom = (e: React.FormEvent) => {
     e.preventDefault();
-    const roomToAdd = {
-      ...newRoom,
+    if (!newRoom.id || !newRoom.price || !newRoom.type || !newRoom.floor) return;
+    const roomToAdd: RoomType = {
+      id: newRoom.id!,
+      type: newRoom.type!,
+      price: newRoom.price!,
+      floor: newRoom.floor!,
       status: 'Available',
-      image: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=400'
+      image: newRoom.image || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=400'
     };
     setRooms([...rooms, roomToAdd]);
     setIsAddModalOpen(false);
     showSuccess(`Room ${newRoom.id} added successfully!`);
-    setNewRoom({ id: '', type: 'Standard', price: '', floor: '1st Floor' });
+    setNewRoom({ id: '', type: 'Standard', price: '', floor: '1st Floor', image: '' });
   };
 
   const handleDeleteRoom = () => {
@@ -62,7 +87,7 @@ const Rooms = () => {
         </header>
 
         <div className="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {rooms.map((room) => (
+          {rooms.map(room => (
             <Card key={room.id} className="overflow-hidden border-none shadow-sm hover:shadow-md transition-all bg-white group">
               <div className="relative h-40 overflow-hidden">
                 <img src={room.image} alt={room.id} className="w-full h-full object-cover" />
@@ -75,9 +100,10 @@ const Rooms = () => {
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="font-bold text-lg">Room {room.id}</h3>
-                  <Badge className={cn(
-                    "text-[10px] uppercase",
-                    room.status === 'Available' ? "bg-green-500" : "bg-blue-500"
+                  <Badge className={cn("text-[10px] uppercase",
+                    room.status === 'Available' ? "bg-green-500" :
+                    room.status === 'Occupied' ? "bg-red-500" :
+                    "bg-yellow-500"
                   )}>{room.status}</Badge>
                 </div>
                 <p className="text-xs text-slate-500 mb-4">{room.type} • {room.floor}</p>
@@ -130,6 +156,10 @@ const Rooms = () => {
                   <Label>Price (UGX)</Label>
                   <Input value={newRoom.price} onChange={e => setNewRoom({...newRoom, price: e.target.value})} placeholder="150,000" required />
                 </div>
+              </div>
+              <div className="space-y-2">
+                <Label>Upload Room Image</Label>
+                <Input type="file" accept="image/*" onChange={handleImageUpload} />
               </div>
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
