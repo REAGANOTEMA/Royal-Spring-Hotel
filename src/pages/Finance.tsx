@@ -1,205 +1,132 @@
 "use client";
 
-import React from 'react';
+import React, { useState } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
-import { DollarSign, TrendingUp, TrendingDown, CreditCard, Wallet, FileText, Download, ArrowUpRight, ArrowDownRight, PieChart } from 'lucide-react';
+import DeleteDialog from '@/components/DeleteDialog';
+import { DollarSign, Plus, Trash2, Download, Receipt } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, BarChart, Bar, Cell } from 'recharts';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { cn } from '@/lib/utils';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { showSuccess } from '@/utils/toast';
 
-const revenueData = [
-  { month: 'Jan', revenue: 4500000, expenses: 3200000 },
-  { month: 'Feb', revenue: 5200000, expenses: 3400000 },
-  { month: 'Mar', revenue: 4800000, expenses: 3100000 },
-  { month: 'Apr', revenue: 6100000, expenses: 3800000 },
-  { month: 'May', revenue: 5900000, expenses: 3600000 },
-  { month: 'Jun', revenue: 7200000, expenses: 4100000 },
-];
-
-const deptRevenue = [
-  { name: 'Rooms', value: 8500000, color: '#3b82f6' },
-  { name: 'F&B', value: 4200000, color: '#10b981' },
-  { name: 'Laundry', value: 1200000, color: '#6366f1' },
-  { name: 'Events', value: 2500000, color: '#f59e0b' },
-];
-
-const receivables = [
-  { id: 'REC-001', guest: 'John Doe', amount: '150,000', dueDate: '2024-05-30', status: 'Pending' },
-  { id: 'REC-002', guest: 'Sarah Smith', amount: '45,000', dueDate: '2024-05-28', status: 'Overdue' },
-];
-
-const payables = [
-  { id: 'PAY-001', supplier: 'Fresh Foods Ltd', amount: '1,200,000', dueDate: '2024-06-05', status: 'Scheduled' },
-  { id: 'PAY-002', supplier: 'CleanCo Services', amount: '450,000', dueDate: '2024-06-01', status: 'Pending' },
+const initialTransactions = [
+  { id: 'TRX-001', type: 'Income', category: 'Rooms', amount: '850,000', date: '2024-05-24', status: 'Completed' },
+  { id: 'TRX-002', type: 'Expense', category: 'Supplies', amount: '120,000', date: '2024-05-24', status: 'Pending' },
 ];
 
 const Finance = () => {
+  const [transactions, setTransactions] = useState(initialTransactions);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [newTrx, setNewTrx] = useState({ type: 'Income', category: '', amount: '' });
+
+  const handleAddTrx = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trxToAdd = {
+      id: `TRX-00${transactions.length + 1}`,
+      ...newTrx,
+      date: new Date().toISOString().split('T')[0],
+      status: 'Completed'
+    };
+    setTransactions([trxToAdd, ...transactions]);
+    setIsAddModalOpen(false);
+    showSuccess("Transaction recorded successfully.");
+    setNewTrx({ type: 'Income', category: '', amount: '' });
+  };
+
+  const handleDelete = () => {
+    setTransactions(transactions.filter(t => t.id !== selectedId));
+    setIsDeleteModalOpen(false);
+    showSuccess("Transaction record deleted.");
+  };
+
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 flex flex-col">
         <header className="h-16 bg-white border-b px-8 flex items-center justify-between sticky top-0 z-10">
-          <h2 className="text-xl font-bold text-slate-800">Financial Management</h2>
-          <div className="flex gap-2">
-            <Button variant="outline">
-              <Download size={18} className="mr-2" /> Export Report
-            </Button>
-            <Button className="bg-blue-600 hover:bg-blue-700">
-              <DollarSign size={18} className="mr-2" /> Record Transaction
-            </Button>
+          <div className="flex items-center gap-2">
+            <DollarSign className="text-blue-600" size={24} />
+            <h2 className="text-xl font-bold text-slate-800">Finance & Accounts</h2>
           </div>
+          <Button className="bg-blue-600" onClick={() => setIsAddModalOpen(true)}><Plus size={18} className="mr-2" /> Record Transaction</Button>
         </header>
 
-        <div className="p-8 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card className="border-none shadow-sm bg-emerald-600 text-white">
-              <CardContent className="p-6">
-                <p className="text-emerald-100 text-sm">Total Revenue (MTD)</p>
-                <h3 className="text-3xl font-bold mt-1">UGX 12.4M</h3>
-              </CardContent>
-            </Card>
-            <Card className="border-none shadow-sm bg-rose-600 text-white">
-              <CardContent className="p-6">
-                <p className="text-rose-100 text-sm">Total Expenses (MTD)</p>
-                <h3 className="text-3xl font-bold mt-1">UGX 4.8M</h3>
-              </CardContent>
-            </Card>
-            <Card className="border-none shadow-sm bg-blue-600 text-white">
-              <CardContent className="p-6">
-                <p className="text-blue-100 text-sm">Net Profit (MTD)</p>
-                <h3 className="text-3xl font-bold mt-1">UGX 7.6M</h3>
-              </CardContent>
-            </Card>
-          </div>
-
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="bg-white border mb-6">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="departments">Departmental Income</TabsTrigger>
-              <TabsTrigger value="receivables">Receivables</TabsTrigger>
-              <TabsTrigger value="payables">Payables</TabsTrigger>
-            </TabsList>
-
-            <TabsContent value="overview">
-              <Card className="border-none shadow-sm">
-                <CardHeader><CardTitle className="text-lg">Revenue vs Expenses Trend</CardTitle></CardHeader>
-                <CardContent className="h-[350px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={revenueData}>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                      <XAxis dataKey="month" axisLine={false} tickLine={false} />
-                      <YAxis axisLine={false} tickLine={false} />
-                      <Tooltip />
-                      <Area type="monotone" dataKey="revenue" stroke="#10b981" fill="#10b981" fillOpacity={0.1} />
-                      <Area type="monotone" dataKey="expenses" stroke="#f43f5e" fill="#f43f5e" fillOpacity={0.1} />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="departments">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <Card className="border-none shadow-sm">
-                  <CardHeader><CardTitle className="text-lg">Income by Department</CardTitle></CardHeader>
-                  <CardContent className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={deptRevenue} layout="vertical">
-                        <XAxis type="number" hide />
-                        <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} />
-                        <Tooltip />
-                        <Bar dataKey="value" radius={[0, 4, 4, 0]} barSize={30}>
-                          {deptRevenue.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} />
-                          ))}
-                        </Bar>
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </CardContent>
-                </Card>
-                <Card className="border-none shadow-sm">
-                  <CardHeader><CardTitle className="text-lg">Departmental Breakdown</CardTitle></CardHeader>
-                  <CardContent>
-                    <div className="space-y-4">
-                      {deptRevenue.map((dept) => (
-                        <div key={dept.name} className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <div className="w-3 h-3 rounded-full" style={{ backgroundColor: dept.color }} />
-                            <span className="font-medium">{dept.name}</span>
-                          </div>
-                          <span className="font-bold">UGX {dept.value.toLocaleString()}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
-            </TabsContent>
-
-            <TabsContent value="receivables">
-              <Card className="border-none shadow-sm overflow-hidden">
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader className="bg-slate-50">
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Guest</TableHead>
-                        <TableHead>Amount (UGX)</TableHead>
-                        <TableHead>Due Date</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {receivables.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell>{item.id}</TableCell>
-                          <TableCell className="font-semibold">{item.guest}</TableCell>
-                          <TableCell className="font-bold text-emerald-600">{item.amount}</TableCell>
-                          <TableCell>{item.dueDate}</TableCell>
-                          <TableCell><Badge variant={item.status === 'Overdue' ? 'destructive' : 'secondary'}>{item.status}</Badge></TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="payables">
-              <Card className="border-none shadow-sm overflow-hidden">
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader className="bg-slate-50">
-                      <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Supplier</TableHead>
-                        <TableHead>Amount (UGX)</TableHead>
-                        <TableHead>Due Date</TableHead>
-                        <TableHead>Status</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {payables.map((item) => (
-                        <TableRow key={item.id}>
-                          <TableCell>{item.id}</TableCell>
-                          <TableCell className="font-semibold">{item.supplier}</TableCell>
-                          <TableCell className="font-bold text-rose-600">{item.amount}</TableCell>
-                          <TableCell>{item.dueDate}</TableCell>
-                          <TableCell><Badge variant="secondary">{item.status}</Badge></TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-          </Tabs>
+        <div className="p-8">
+          <Card className="border-none shadow-sm overflow-hidden">
+            <CardHeader className="bg-white border-b"><CardTitle className="text-lg">Recent Transactions</CardTitle></CardHeader>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader className="bg-slate-50">
+                  <TableRow>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Category</TableHead>
+                    <TableHead>Amount (UGX)</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {transactions.map((t) => (
+                    <TableRow key={t.id}>
+                      <TableCell>
+                        <Badge className={t.type === 'Income' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                          {t.type}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="font-bold">{t.category}</TableCell>
+                      <TableCell className="font-black">{t.amount}</TableCell>
+                      <TableCell>{t.date}</TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" className="text-red-500" onClick={() => { setSelectedId(t.id); setIsDeleteModalOpen(true); }}>
+                          <Trash2 size={16} />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </div>
+
+        <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
+          <DialogContent>
+            <DialogHeader><DialogTitle>Record Transaction</DialogTitle></DialogHeader>
+            <form onSubmit={handleAddTrx} className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label>Transaction Type</Label>
+                <Select onValueChange={val => setNewTrx({...newTrx, type: val})}>
+                  <SelectTrigger><SelectValue placeholder="Select Type" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Income">Income</SelectItem>
+                    <SelectItem value="Expense">Expense</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label>Category</Label>
+                <Input value={newTrx.category} onChange={e => setNewTrx({...newTrx, category: e.target.value})} placeholder="e.g. Room Payment, Food Supply" required />
+              </div>
+              <div className="space-y-2">
+                <Label>Amount (UGX)</Label>
+                <Input value={newTrx.amount} onChange={e => setNewTrx({...newTrx, amount: e.target.value})} placeholder="0" required />
+              </div>
+              <DialogFooter>
+                <Button type="submit" className="w-full bg-blue-600">Save Transaction</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
+        <DeleteDialog isOpen={isDeleteModalOpen} onClose={() => setIsDeleteModalOpen(false)} onConfirm={handleDelete} />
         <Footer />
       </main>
     </div>
