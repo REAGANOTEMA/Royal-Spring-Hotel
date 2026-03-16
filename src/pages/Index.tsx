@@ -2,13 +2,22 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Hotel, Star, MapPin, Phone, Mail, ChevronRight, ShieldCheck, Coffee, Wifi, Waves, Play } from 'lucide-react';
+import { Hotel, Star, MapPin, Phone, Mail, ChevronRight, ShieldCheck, Coffee, Wifi, Waves, Play, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import Footer from '@/components/Footer';
 import AIChat from '@/components/AIChat';
 
 const Index = () => {
+  const galleryImages = [
+    { url: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=800', title: 'Luxury Suite' },
+    { url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800', title: 'Resort View' },
+    { url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=800', title: 'Infinity Pool' },
+    { url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=800', title: 'Gourmet Dining' },
+    { url: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80&w=800', title: 'Lush Vegetation' },
+    { url: 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=800', title: 'Serene Compound' },
+  ];
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       {/* Navigation */}
@@ -20,8 +29,8 @@ const Index = () => {
         <div className="flex items-center gap-4 md:gap-8">
           <div className="hidden lg:flex items-center gap-8">
             <a href="#rooms" className="text-sm font-semibold text-slate-600 hover:text-blue-700 transition-colors">Rooms</a>
+            <a href="#gallery" className="text-sm font-semibold text-slate-600 hover:text-blue-700 transition-colors">Gallery</a>
             <a href="#amenities" className="text-sm font-semibold text-slate-600 hover:text-blue-700 transition-colors">Amenities</a>
-            <a href="#contact" className="text-sm font-semibold text-slate-600 hover:text-blue-700 transition-colors">Contact</a>
           </div>
           <Link to="/login">
             <Button variant="outline" className="border-blue-700 text-blue-700 hover:bg-blue-50 font-bold">Staff Portal</Button>
@@ -35,7 +44,6 @@ const Index = () => {
       {/* Video Hero Section */}
       <section className="relative h-[85vh] flex items-center justify-center overflow-hidden">
         <div className="absolute inset-0 z-0">
-          {/* Using a high-quality luxury hotel stock video */}
           <video 
             autoPlay 
             muted 
@@ -65,14 +73,40 @@ const Index = () => {
                 Reserve Your Stay
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-md border-white text-white hover:bg-white hover:text-slate-900 text-xl px-10 h-16 font-bold rounded-2xl">
-              Explore Gallery
-            </Button>
+            <a href="#gallery">
+              <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-md border-white text-white hover:bg-white hover:text-slate-900 text-xl px-10 h-16 font-bold rounded-2xl w-full sm:w-auto">
+                Explore Gallery
+              </Button>
+            </a>
           </div>
         </div>
       </section>
 
-      {/* Features / Amenities */}
+      {/* Gallery Section */}
+      <section id="gallery" className="py-24 bg-slate-50">
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-slate-900 mb-4">Our Sanctuary</h2>
+            <p className="text-slate-500 max-w-2xl mx-auto">Take a glimpse into the world of Royal Springs, from our lush compounds to our exquisite dining.</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {galleryImages.map((img, i) => (
+              <div key={i} className="relative group overflow-hidden rounded-3xl aspect-[4/3] shadow-lg">
+                <img 
+                  src={img.url} 
+                  alt={img.title} 
+                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
+                  <p className="text-white font-bold text-xl">{img.title}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Amenities */}
       <section id="amenities" className="py-24 container mx-auto px-4">
         <div className="text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-bold text-slate-900 mb-6">Exquisite Amenities</h2>
@@ -97,44 +131,6 @@ const Index = () => {
               </CardContent>
             </Card>
           ))}
-        </div>
-      </section>
-
-      {/* Video Showcase Section */}
-      <section className="py-24 bg-slate-950 text-white">
-        <div className="container mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          <div className="space-y-8">
-            <h2 className="text-4xl md:text-5xl font-bold leading-tight">Immerse Yourself in <br/> Pure Tranquility</h2>
-            <p className="text-slate-400 text-xl leading-relaxed">
-              From our lush green compounds to our exquisitely prepared food, every moment at Royal Springs is a celebration of life. Watch our story and feel the warmth of our hospitality.
-            </p>
-            <div className="flex gap-4">
-              <div className="flex flex-col">
-                <span className="text-4xl font-bold text-blue-500">20+</span>
-                <span className="text-slate-500 uppercase tracking-widest text-xs font-bold">Luxury Rooms</span>
-              </div>
-              <div className="w-px h-12 bg-slate-800 mx-4" />
-              <div className="flex flex-col">
-                <span className="text-4xl font-bold text-blue-500">5★</span>
-                <span className="text-slate-500 uppercase tracking-widest text-xs font-bold">Service Rating</span>
-              </div>
-            </div>
-          </div>
-          <div className="relative rounded-3xl overflow-hidden shadow-2xl aspect-video group">
-            <video 
-              autoPlay 
-              muted 
-              loop 
-              className="w-full h-full object-cover"
-            >
-              <source src="https://assets.mixkit.co/videos/preview/mixkit-luxury-resort-with-a-swimming-pool-and-palm-trees-42474-large.mp4" type="video/mp4" />
-            </video>
-            <div className="absolute inset-0 bg-black/20 flex items-center justify-center group-hover:bg-black/10 transition-all">
-              <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center border border-white/30">
-                <Play className="text-white fill-white ml-1" size={32} />
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 

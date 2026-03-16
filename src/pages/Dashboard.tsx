@@ -8,15 +8,14 @@ import {
   Users, 
   Bed, 
   DollarSign,
-  ArrowUpRight,
-  ArrowDownRight,
   Clock,
-  ShieldCheck,
   Briefcase,
   LogIn,
   LogOut,
   Timer,
-  Brush
+  Brush,
+  CheckCircle2,
+  UserCheck
 } from 'lucide-react';
 import { 
   BarChart, 
@@ -32,6 +31,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { showSuccess } from '@/utils/toast';
 
@@ -43,6 +43,13 @@ const data = [
   { name: 'Fri', revenue: 1890, bookings: 12 },
   { name: 'Sat', revenue: 2390, bookings: 22 },
   { name: 'Sun', revenue: 3490, bookings: 28 },
+];
+
+const attendanceData = [
+  { name: 'Alice Johnson', role: 'Reception', time: '08:00 AM', status: 'On Duty' },
+  { name: 'Bob Williams', role: 'Kitchen', time: '07:45 AM', status: 'On Duty' },
+  { name: 'Sarah Smith', role: 'Housekeeping', time: '09:15 AM', status: 'On Duty' },
+  { name: 'Michael Brown', role: 'Security', time: '06:00 PM', status: 'Off Duty' },
 ];
 
 const Dashboard = () => {
@@ -103,35 +110,6 @@ const Dashboard = () => {
         </header>
 
         <div className="p-8 space-y-8">
-          {/* Staff Attendance Monitor */}
-          {role === 'staff' && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Card className="border-none shadow-md bg-white">
-                <CardContent className="p-6 flex items-center gap-4">
-                  <div className={cn("p-3 rounded-xl", isClockedIn ? "bg-green-100 text-green-600" : "bg-slate-100 text-slate-400")}>
-                    <Timer size={24} />
-                  </div>
-                  <div>
-                    <p className="text-sm text-slate-500">Current Status</p>
-                    <h3 className="text-xl font-bold">{isClockedIn ? "On Duty" : "Off Duty"}</h3>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="border-none shadow-md bg-white">
-                <CardContent className="p-6 flex items-center gap-4">
-                  <div className="p-3 bg-blue-100 text-blue-600 rounded-xl"><Clock size={24} /></div>
-                  <div><p className="text-sm text-slate-500">Clocked In At</p><h3 className="text-xl font-bold">{clockInTime || "--:--"}</h3></div>
-                </CardContent>
-              </Card>
-              <Card className="border-none shadow-sm bg-white">
-                <CardContent className="p-6 flex items-center gap-4">
-                  <div className="p-3 bg-indigo-100 text-indigo-600 rounded-xl"><Briefcase size={24} /></div>
-                  <div><p className="text-sm text-slate-500">Total Hours (This Week)</p><h3 className="text-xl font-bold">38h 45m</h3></div>
-                </CardContent>
-              </Card>
-            </div>
-          )}
-
           {/* Stats Grid for Management */}
           {(role === 'director' || role === 'general_manager') && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -155,6 +133,44 @@ const Dashboard = () => {
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Live Attendance Monitor for Director */}
+            {(role === 'director' || role === 'general_manager') && (
+              <Card className="shadow-md border-none">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-lg">Live Staff Attendance</CardTitle>
+                  <UserCheck className="text-green-500" size={20} />
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {attendanceData.map((staff, i) => (
+                      <div key={i} className="flex items-center justify-between p-3 rounded-xl bg-slate-50 border border-slate-100">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback className="bg-blue-100 text-blue-600 font-bold">
+                              {staff.name.split(' ').map(n => n[0]).join('')}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div>
+                            <p className="font-bold text-sm text-slate-900">{staff.name}</p>
+                            <p className="text-xs text-slate-500">{staff.role}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge className={cn(
+                            "text-[10px] font-bold uppercase",
+                            staff.status === 'On Duty' ? "bg-green-100 text-green-700" : "bg-slate-200 text-slate-500"
+                          )}>
+                            {staff.status}
+                          </Badge>
+                          <p className="text-[10px] text-slate-400 mt-1">{staff.time}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {/* Housekeeping Tasks for Staff */}
             {role === 'staff' && (
               <Card className="shadow-md border-none">
@@ -177,37 +193,6 @@ const Dashboard = () => {
                         <Button size="sm" className="bg-amber-600 hover:bg-amber-700">Mark Clean</Button>
                       </div>
                     ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Personal HR Info for Staff */}
-            {role === 'staff' && (
-              <Card className="shadow-md border-none">
-                <CardHeader><CardTitle className="text-lg">My Employment Info</CardTitle></CardHeader>
-                <CardContent className="space-y-6">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="p-4 bg-slate-50 rounded-xl">
-                      <p className="text-xs text-slate-500 uppercase font-bold">Leave Balance</p>
-                      <p className="text-xl font-black text-blue-600">12 Days</p>
-                    </div>
-                    <div className="p-4 bg-slate-50 rounded-xl">
-                      <p className="text-xs text-slate-500 uppercase font-bold">Next Payday</p>
-                      <p className="text-xl font-black text-emerald-600">June 1st</p>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <p className="text-sm font-bold">My Performance Targets</p>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-xs">
-                        <span>Guest Satisfaction</span>
-                        <span className="font-bold">85%</span>
-                      </div>
-                      <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                        <div className="h-full bg-blue-600" style={{ width: '85%' }} />
-                      </div>
-                    </div>
                   </div>
                 </CardContent>
               </Card>
