@@ -1,14 +1,19 @@
 // src/main.tsx
+"use client";
+
 import React from "react";
-import { createRoot } from "react-dom/client"; // Use createRoot for React 18+
-import App from "./App"; // Ensure this points to your main app file
-import "./globals.css"; // Global styles including Tailwind
+import { createRoot } from "react-dom/client"; // React 18+ root API
+import App from "./App"; // Main App component
+import "./globals.css"; // Tailwind global styles
 
-// Ensure the root element exists and render the app
+// Get the root element
 const container = document.getElementById("root");
-if (!container) throw new Error("Root element not found");
+if (!container) throw new Error("Root element with id 'root' not found");
 
+// Create React root
 const root = createRoot(container);
+
+// Render the app
 root.render(
   <React.StrictMode>
     <App />
