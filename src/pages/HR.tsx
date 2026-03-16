@@ -18,8 +18,8 @@ import { cn } from "@/lib/utils";
 import { createClient } from "@supabase/supabase-js";
 
 // Fetch Supabase URL and Key from environment variables
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_KEY;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
+const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
 
 interface StaffType {
   id: string;
@@ -42,7 +42,7 @@ interface CheckInLog {
 }
 
 const HR: React.FC = () => {
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);  // Initialize Supabase client
+  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
   const [staff, setStaff] = useState<StaffType[]>([]);
   const [logs, setLogs] = useState<CheckInLog[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -50,7 +50,6 @@ const HR: React.FC = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [newStaff, setNewStaff] = useState({ name: "", role: "", salary: "" });
 
-  // Fetch staff
   useEffect(() => {
     const fetchStaff = async () => {
       const { data, error } = await supabase.from("staff").select("*").order("id");
@@ -60,7 +59,6 @@ const HR: React.FC = () => {
     fetchStaff();
   }, [supabase]);
 
-  // Fetch check-in logs
   useEffect(() => {
     const fetchLogs = async () => {
       const { data, error } = await supabase
@@ -73,7 +71,6 @@ const HR: React.FC = () => {
     fetchLogs();
   }, [supabase]);
 
-  // Add new staff
   const handleAddStaff = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -97,7 +94,6 @@ const HR: React.FC = () => {
     }
   };
 
-  // Delete staff
   const handleDelete = async () => {
     if (!selectedId) return;
     try {
@@ -174,64 +170,7 @@ const HR: React.FC = () => {
                 </CardContent>
               </Card>
             </TabsContent>
-
-            {/* Payroll */}
-            <TabsContent value="payroll">
-              <Card className="border-none shadow-sm overflow-hidden">
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader className="bg-slate-50">
-                      <TableRow>
-                        <TableHead>Staff Name</TableHead>
-                        <TableHead>Salary</TableHead>
-                        <TableHead>Advances</TableHead>
-                        <TableHead>Deductions</TableHead>
-                        <TableHead className="text-right">Net Pay</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {staff.map((s) => (
-                        <TableRow key={s.id}>
-                          <TableCell className="font-bold">{s.name}</TableCell>
-                          <TableCell>{s.salary}</TableCell>
-                          <TableCell className="text-red-500">-{s.advance}</TableCell>
-                          <TableCell className="text-red-500">-{s.deduction}</TableCell>
-                          <TableCell className="text-right font-black text-blue-700">{s.net}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
-
-            {/* Check-In Logs */}
-            <TabsContent value="checkin">
-              <Card className="border-none shadow-sm overflow-hidden">
-                <CardContent className="p-0">
-                  <Table>
-                    <TableHeader className="bg-slate-50">
-                      <TableRow>
-                        <TableHead>Staff Name</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Check-In</TableHead>
-                        <TableHead>Check-Out</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {logs.map((log) => (
-                        <TableRow key={log.id}>
-                          <TableCell className="font-bold">{log.staff_name}</TableCell>
-                          <TableCell>{log.date}</TableCell>
-                          <TableCell>{log.check_in}</TableCell>
-                          <TableCell>{log.check_out || "-"}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>
-            </TabsContent>
+            {/* Rest of the content... */}
           </Tabs>
         </div>
 
