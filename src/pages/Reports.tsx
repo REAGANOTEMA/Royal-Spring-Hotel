@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
 import {
@@ -18,49 +18,67 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Download, FileText, TrendingUp, Users, Bed, DollarSign } from "lucide-react";
+import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
 
-const revenueData = [
-  { name: "Jan", value: 4500000 },
-  { name: "Feb", value: 5200000 },
-  { name: "Mar", value: 4800000 },
-  { name: "Apr", value: 6100000 },
-  { name: "May", value: 5900000 },
-];
-
-const occupancyData = [
-  { name: "Standard", value: 85, color: "#3b82f6" },
-  { name: "Deluxe", value: 72, color: "#10b981" },
-  { name: "Suite", value: 45, color: "#f59e0b" },
-];
-
 const Reports: React.FC = () => {
-  const kpis = [
-    { label: "Avg. Daily Rate", value: "UGX 245k", icon: DollarSign, color: "text-blue-600" },
-    { label: "Occupancy Rate", value: "78%", icon: Bed, color: "text-emerald-600" },
-    { label: "Guest Satisfaction", value: "4.8/5", icon: Users, color: "text-amber-600" },
-    { label: "RevPAR", value: "UGX 192k", icon: TrendingUp, color: "text-purple-600" },
-  ];
+  const [revenueData, setRevenueData] = useState<any[]>([]);
+  const [occupancyData, setOccupancyData] = useState<any[]>([]);
+  const [kpis, setKpis] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchReportData = async () => {
+      // 1. Fetch Revenue Trend
+      const { data: billingData } = await supabase.from('billing').select('amount, date');
+      const monthlyRev = (billingData || []).reduce((acc: any, curr: any) => {
+        const month = new Date(curr.date).toLocaleString('default', { month: 'short' });
+        acc[month] = (acc[month] || 0) + parseFloat(curr.amount.replace(/,/g, ''));
+        return acc;
+      }, {});
+      
+      setRevenueData(Object.keys(monthlyRev).map(month => ({ name: month, value: monthlyRev[month] })));
+
+      // 2. Fetch Occupancy
+      const { data: roomData } = await supabase.from('rooms').select('type, status');
+      const occStats = (roomData || []).reduce((acc: any, curr: any) => {
+        if (!acc[curr.type]) acc[curr.type] = { total: 0, occupied: 0 };
+        acc[curr.type].total++;
+        if (curr.status === 'Occupied') acc[curr.type].occupied++;
+        return acc;
+      }, {});
+
+      setOccupancyData(Object.keys(occStats).map(type => ({
+        name: type,
+        value: Math.round((occStats[type].occupied / occStats[type].total) * 100),
+        color: type === 'Suite' ? '#f59e0b' : type === 'Deluxe' ? '#10b981' : '#3b82f6'
+      })));
+
+      // 3. Set KPIs
+      setKpis([
+        { label: "Avg. Daily Rate", value: "UGX 245k", icon: DollarSign, color: "text-blue-600" },
+        { label: "Occupancy Rate", value: "78%", icon: Bed, color: "text-emerald-600" },
+        { label: "Guest Satisfaction", value: "4.8/5", icon: Users, color: "text-amber-600" },
+        { label: "RevPAR", value: "UGX 192k", icon: TrendingUp, color: "text-purple-600" },
+      ]);
+    };
+
+    fetchReportData();
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 flex flex-col">
-        {/* Header */}
         <header className="h-16 bg-white border-b px-8 flex items-center justify-between sticky top-0 z-10">
           <h2 className="text-xl font-bold text-slate-800">Executive Reporting Suite</h2>
           <div className="flex gap-2">
-            <Button variant="outline" className="font-bold flex items-center">
+            <Button variant="outline" className="font-bold" onClick={() => window.print()}>
               <Download size={18} className="mr-2" /> Export PDF
-            </Button>
-            <Button className="bg-blue-700 hover:bg-blue-800 font-bold flex items-center">
-              <FileText size={18} className="mr-2" /> Generate Custom Report
             </Button>
           </div>
         </header>
 
         <div className="p-8 space-y-8">
-          {/* KPIs */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             {kpis.map((kpi, i) => (
               <Card key={i} className="border-none shadow-lg bg-white">
@@ -78,11 +96,8 @@ const Reports: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Revenue Trend */}
             <Card className="border-none shadow-xl bg-white rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold">Monthly Revenue Growth</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle className="text-lg font-bold">Monthly Revenue Growth</CardTitle></CardHeader>
               <CardContent className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={revenueData}>
@@ -90,23 +105,14 @@ const Reports: React.FC = () => {
                     <XAxis dataKey="name" axisLine={false} tickLine={false} />
                     <YAxis axisLine={false} tickLine={false} />
                     <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="value"
-                      stroke="#3b82f6"
-                      strokeWidth={4}
-                      dot={{ r: 6, fill: "#3b82f6" }}
-                    />
+                    <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={4} dot={{ r: 6, fill: "#3b82f6" }} />
                   </LineChart>
                 </ResponsiveContainer>
               </CardContent>
             </Card>
 
-            {/* Occupancy by Room Category */}
             <Card className="border-none shadow-xl bg-white rounded-2xl">
-              <CardHeader>
-                <CardTitle className="text-lg font-bold">Occupancy by Room Category (%)</CardTitle>
-              </CardHeader>
+              <CardHeader><CardTitle className="text-lg font-bold">Occupancy by Room Category (%)</CardTitle></CardHeader>
               <CardContent className="h-[350px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={occupancyData}>
@@ -125,7 +131,6 @@ const Reports: React.FC = () => {
             </Card>
           </div>
         </div>
-
         <Footer />
       </main>
     </div>

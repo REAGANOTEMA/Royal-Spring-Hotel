@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
-import { Briefcase, Plus, Search, Globe, Eye, Trash2, Edit2, UploadCloud } from 'lucide-react';
+import { Briefcase, Plus, Search, Globe, Eye, Trash2, Edit2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,72 +11,57 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { showSuccess } from '@/utils/toast';
+import { showSuccess, showError } from '@/utils/toast';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 
 interface Job {
   id: string;
   title: string;
   department: string;
   type: string;
-  status: 'Draft' | 'Published';
+  status: string;
   applicants: number;
-  date: string;
-  attachment?: File | null;
+  created_at: string;
 }
 
-const initialJobs: Job[] = [
-  { id: 'JOB-001', title: 'Front Desk Agent', department: 'Reception', type: 'Full-time', status: 'Published', applicants: 12, date: '2024-05-20' },
-  { id: 'JOB-002', title: 'Sous Chef', department: 'Kitchen', type: 'Full-time', status: 'Draft', applicants: 0, date: '2024-05-22' },
-  { id: 'JOB-003', title: 'Housekeeping Supervisor', department: 'Housekeeping', type: 'Full-time', status: 'Published', applicants: 5, date: '2024-05-18' },
-];
-
 const JobPostings = () => {
-  const [jobs, setJobs] = useState<Job[]>(initialJobs);
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [currentJob, setCurrentJob] = useState<Partial<Job>>({});
 
-  // Open dialog for Add/Edit
-  const openJobDialog = (job?: Job) => {
-    if (job) setCurrentJob(job);
-    else setCurrentJob({});
-    setIsDialogOpen(true);
+  const fetchJobs = async () => {
+    const { data, error } = await supabase.from('jobs').select('*').order('created_at', { ascending: false });
+    if (error) showError(error.message);
+    else setJobs(data as Job[]);
   };
 
-  const handleSaveJob = () => {
+  useEffect(() => {
+    fetchJobs();
+  }, []);
+
+  const handleSaveJob = async () => {
     if (!currentJob.title || !currentJob.department || !currentJob.type) return;
+    
     if (currentJob.id) {
-      // Editing existing
-      setJobs(prev => prev.map(j => (j.id === currentJob.id ? { ...j, ...currentJob } as Job : j)));
-      showSuccess("Job updated successfully!");
+      const { error } = await supabase.from('jobs').update(currentJob).eq('id', currentJob.id);
+      if (error) showError(error.message);
+      else showSuccess("Job updated successfully!");
     } else {
-      // Adding new
-      const newJob: Job = {
-        ...(currentJob as Job),
-        id: `JOB-00${jobs.length + 1}`,
-        status: 'Draft',
-        applicants: 0,
-        date: new Date().toISOString().split('T')[0],
-      };
-      setJobs(prev => [...prev, newJob]);
-      showSuccess("New job created!");
+      const { error } = await supabase.from('jobs').insert([currentJob]);
+      if (error) showError(error.message);
+      else showSuccess("New job created!");
     }
     setIsDialogOpen(false);
+    fetchJobs();
   };
 
-  const handleDeleteJob = (id: string) => {
-    setJobs(prev => prev.filter(j => j.id !== id));
-    showSuccess("Job deleted successfully!");
-  };
-
-  const handlePublish = (id: string) => {
-    setJobs(prev => prev.map(j => j.id === id ? { ...j, status: 'Published' } : j));
-    showSuccess("Job published successfully!");
-  };
-
-  const handleAttachmentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setCurrentJob({ ...currentJob, attachment: e.target.files[0] });
+  const handleDeleteJob = async (id: string) => {
+    const { error } = await supabase.from('jobs').delete().eq('id', id);
+    if (error) showError(error.message);
+    else {
+      showSuccess("Job deleted successfully!");
+      fetchJobs();
     }
   };
 
@@ -84,16 +69,14 @@ const JobPostings = () => {
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
       <main className="flex-1 flex flex-col">
-        {/* Header */}
         <header className="h-16 bg-white border-b px-8 flex items-center justify-between sticky top-0 z-10">
           <h2 className="text-xl font-bold text-slate-800">Recruitment & Job Postings</h2>
-          <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => openJobDialog()}>
+          <Button className="bg-blue-600 hover:bg-blue-700" onClick={() => { setCurrentJob({}); setIsDialogOpen(true); }}>
             <Plus size={18} className="mr-2" /> Create New Job
           </Button>
         </header>
 
         <div className="p-8 space-y-6">
-          {/* Search & Info */}
           <div className="flex justify-between items-center">
             <div className="relative w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
@@ -105,7 +88,6 @@ const JobPostings = () => {
             </div>
           </div>
 
-          {/* Job Table */}
           <Card className="border-none shadow-sm overflow-hidden">
             <CardContent className="p-0">
               <Table>
@@ -122,12 +104,7 @@ const JobPostings = () => {
                 <TableBody>
                   {jobs.map(job => (
                     <TableRow key={job.id} className="hover:bg-slate-50/50">
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-semibold">{job.title}</span>
-                          <span className="text-xs text-slate-400">{job.id}</span>
-                        </div>
-                      </TableCell>
+                      <TableCell className="font-semibold">{job.title}</TableCell>
                       <TableCell>{job.department}</TableCell>
                       <TableCell>{job.type}</TableCell>
                       <TableCell>
@@ -138,24 +115,12 @@ const JobPostings = () => {
                       </TableCell>
                       <TableCell className="text-center font-bold">{job.applicants}</TableCell>
                       <TableCell className="text-right flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" title="View on Careers Page">
-                          <Eye size={16} className="text-slate-600" />
-                        </Button>
-                        <Button variant="ghost" size="icon" title="Edit Job" onClick={() => openJobDialog(job)}>
+                        <Button variant="ghost" size="icon" onClick={() => { setCurrentJob(job); setIsDialogOpen(true); }}>
                           <Edit2 size={16} className="text-blue-600" />
                         </Button>
-                        {job.status === 'Draft' && (
-                          <Button variant="ghost" size="sm" className="text-green-600" onClick={() => handlePublish(job.id)}>
-                            Publish
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="icon" title="Delete Job" onClick={() => handleDeleteJob(job.id)}>
+                        <Button variant="ghost" size="icon" onClick={() => handleDeleteJob(job.id)}>
                           <Trash2 size={16} className="text-red-500" />
                         </Button>
-                        <label className="cursor-pointer">
-                          <Input type="file" className="hidden" onChange={handleAttachmentChange} />
-                          <UploadCloud size={16} className="text-purple-600" />
-                        </label>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -165,12 +130,9 @@ const JobPostings = () => {
           </Card>
         </div>
 
-        {/* Add/Edit Job Dialog */}
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{currentJob.id ? "Edit Job" : "Create New Job"}</DialogTitle>
-            </DialogHeader>
+            <DialogHeader><DialogTitle>{currentJob.id ? "Edit Job" : "Create New Job"}</DialogTitle></DialogHeader>
             <div className="space-y-4 py-4">
               <div className="space-y-2">
                 <Label>Job Title</Label>
@@ -182,7 +144,18 @@ const JobPostings = () => {
               </div>
               <div className="space-y-2">
                 <Label>Type</Label>
-                <Input value={currentJob.type || ''} onChange={e => setCurrentJob({ ...currentJob, type: e.target.value })} required />
+                <Input value={currentJob.type || ''} onChange={e => setCurrentJob({ ...currentJob, type: e.target.value })} placeholder="e.g. Full-time" required />
+              </div>
+              <div className="space-y-2">
+                <Label>Status</Label>
+                <select 
+                  value={currentJob.status || 'Draft'} 
+                  onChange={e => setCurrentJob({ ...currentJob, status: e.target.value })}
+                  className="w-full h-10 border rounded-md px-2"
+                >
+                  <option value="Draft">Draft</option>
+                  <option value="Published">Published</option>
+                </select>
               </div>
               <DialogFooter>
                 <Button className="w-full bg-blue-600" onClick={handleSaveJob}>
@@ -192,7 +165,6 @@ const JobPostings = () => {
             </div>
           </DialogContent>
         </Dialog>
-
         <Footer />
       </main>
     </div>

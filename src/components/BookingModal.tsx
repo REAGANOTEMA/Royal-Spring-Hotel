@@ -8,9 +8,22 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { showSuccess } from '@/utils/toast';
 
+interface Booking {
+  id: string;
+  guest: string;
+  room: string;
+  status: string;
+  amount: string;
+  checkIn?: string;
+  checkOut?: string;
+  type?: string;
+}
+
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  bookings?: Booking[];
+  setBookings?: React.Dispatch<React.SetStateAction<Booking[]>>;
 }
 
 const BookingModal = ({ isOpen, onClose }: BookingModalProps) => {

@@ -7,13 +7,13 @@ BEGIN
   IF NEW.status = 'Cleaning' AND OLD.status != 'Cleaning' THEN
     -- Deduct 1 set of linens
     UPDATE inventory 
-    SET stock_level = stock_level - 1 
-    WHERE name ILIKE '%Linens%' AND stock_level > 0;
+    SET stock = stock - 1 
+    WHERE name ILIKE '%Linens%' AND stock > 0;
     
     -- Deduct 2 bars of soap/toiletries
     UPDATE inventory 
-    SET stock_level = stock_level - 2 
-    WHERE name ILIKE '%Soap%' OR name ILIKE '%Toiletries%' AND stock_level > 0;
+    SET stock = stock - 2 
+    WHERE name ILIKE '%Soap%' OR name ILIKE '%Toiletries%' AND stock > 0;
     
     -- Log the activity
     INSERT INTO audit_logs (user_name, action)
@@ -24,6 +24,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 2. Trigger for Room Status Change
+DROP TRIGGER IF EXISTS on_room_cleaning ON rooms;
 CREATE TRIGGER on_room_cleaning
 AFTER UPDATE ON rooms
 FOR EACH ROW
@@ -38,6 +39,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+DROP TRIGGER IF EXISTS update_inventory_modtime ON inventory;
 CREATE TRIGGER update_inventory_modtime
 BEFORE UPDATE ON inventory
 FOR EACH ROW

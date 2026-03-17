@@ -20,7 +20,8 @@ import {
   ImageIcon,
   Menu,
   X,
-  User
+  User,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -28,20 +29,21 @@ import { Button } from '@/components/ui/button';
 
 const SidebarContent = ({ role, userName, location, onClose }: any) => {
   const menuItems = [
-    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', roles: ['director', 'general_manager', 'hr', 'staff'] },
-    { icon: MessageSquare, label: 'Messages', path: '/messages', roles: ['director', 'general_manager', 'staff'] },
-    { icon: BedDouble, label: 'Rooms', path: '/rooms', roles: ['director', 'general_manager', 'staff'] },
-    { icon: CalendarCheck, label: 'Bookings', path: '/bookings', roles: ['director', 'general_manager', 'staff'] },
-    { icon: Receipt, label: 'Billing', path: '/billing', roles: ['director', 'general_manager', 'staff'] },
-    { icon: Users, label: 'Guests', path: '/guests', roles: ['director', 'general_manager', 'staff'] },
-    { icon: Package, label: 'Inventory', path: '/inventory', roles: ['director', 'general_manager'] },
-    { icon: BarChart3, label: 'Finance', path: '/finance', roles: ['director', 'general_manager'] },
-    { icon: FileBarChart, label: 'Reports', path: '/reports', roles: ['director'] },
-    { icon: UserCog, label: 'HR & Staff', path: '/hr', roles: ['director', 'general_manager', 'hr'] },
+    { icon: LayoutDashboard, label: 'Dashboard', path: '/dashboard', roles: ['director', 'gm', 'hr', 'accountant', 'waiter', 'housekeeper', 'chef', 'staff'] },
+    { icon: MessageSquare, label: 'Messages', path: '/messages', roles: ['director', 'gm', 'staff'] },
+    { icon: BedDouble, label: 'Rooms', path: '/rooms', roles: ['director', 'gm', 'housekeeper', 'staff'] },
+    { icon: CalendarCheck, label: 'Bookings', path: '/bookings', roles: ['director', 'gm', 'staff'] },
+    { icon: Receipt, label: 'Billing', path: '/billing', roles: ['director', 'gm', 'accountant', 'waiter', 'staff'] },
+    { icon: Users, label: 'Guests', path: '/guests', roles: ['director', 'gm', 'staff'] },
+    { icon: Package, label: 'Inventory', path: '/inventory', roles: ['director', 'gm', 'accountant', 'chef', 'housekeeper'] },
+    { icon: BarChart3, label: 'Finance', path: '/finance', roles: ['director', 'gm', 'accountant'] },
+    { icon: FileBarChart, label: 'Reports', path: '/reports', roles: ['director', 'gm'] },
+    { icon: UserCog, label: 'HR & Staff', path: '/hr', roles: ['director', 'gm', 'hr'] },
+    { icon: ShieldCheck, label: 'User Management', path: '/users', roles: ['director'] },
     { icon: Briefcase, label: 'Job Postings', path: '/job-postings', roles: ['director', 'hr'] },
-    { icon: ImageIcon, label: 'Media Library', path: '/media', roles: ['director', 'general_manager'] },
+    { icon: ImageIcon, label: 'Media Library', path: '/media', roles: ['director', 'gm'] },
     { icon: ShieldAlert, label: 'Security Logs', path: '/security', roles: ['director'] },
-    { icon: AlertCircle, label: 'Incidents', path: '/incidents', roles: ['director', 'general_manager', 'staff'] },
+    { icon: AlertCircle, label: 'Incidents', path: '/incidents', roles: ['director', 'gm', 'staff'] },
   ];
 
   const filteredItems = menuItems.filter(item => role && item.roles.includes(role));
@@ -125,12 +127,10 @@ const Sidebar = () => {
 
   return (
     <>
-      {/* Desktop Sidebar */}
       <aside className="hidden lg:flex w-64 h-screen sticky top-0 flex-col border-r border-slate-800">
         <SidebarContent role={role} userName={userName} location={location} />
       </aside>
 
-      {/* Mobile Hamburger Menu */}
       <div className="lg:hidden fixed top-4 left-4 z-[60]">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild>

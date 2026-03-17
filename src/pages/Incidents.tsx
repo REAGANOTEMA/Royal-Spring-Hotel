@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { showSuccess, showError } from '@/utils/toast';
-import { supabase } from '@/lib/supabaseClient';
+import { supabase } from '@/lib/supabase';
 
 interface Incident {
   id: string;
@@ -29,7 +29,6 @@ const Incidents = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  // Fetch incidents from Supabase
   const fetchIncidents = async () => {
     try {
       const { data, error } = await supabase
@@ -48,7 +47,6 @@ const Incidents = () => {
   useEffect(() => {
     fetchIncidents();
 
-    // Optional: Real-time subscription to incidents table
     const subscription = supabase
       .channel('public:incidents')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'incidents' }, () => {
@@ -56,10 +54,11 @@ const Incidents = () => {
       })
       .subscribe();
 
-    return () => supabase.removeChannel(subscription);
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, []);
 
-  // Delete an incident
   const handleDelete = async () => {
     if (!selectedId) return;
     try {
@@ -74,7 +73,6 @@ const Incidents = () => {
     setIsDeleteModalOpen(false);
   };
 
-  // Called after adding a new incident in the modal
   const handleNewIncident = (incident: Incident) => {
     setIncidents([incident, ...incidents]);
     showSuccess('Incident reported successfully.');
@@ -132,7 +130,6 @@ const Incidents = () => {
         <Footer />
       </main>
 
-      {/* Modals */}
       <ReportIncidentModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 

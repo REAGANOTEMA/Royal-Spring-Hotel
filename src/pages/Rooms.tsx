@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
 import DeleteDialog from '@/components/DeleteDialog';
-import { Bed, Plus, Trash2, Edit3, Camera } from 'lucide-react';
+import { Bed, Plus, Trash2, Edit3 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,8 +12,9 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { showSuccess } from '@/utils/toast';
+import { showSuccess, showError } from '@/utils/toast';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 
 interface RoomType {
   id: string;
@@ -24,20 +25,23 @@ interface RoomType {
   image: string;
 }
 
-const initialRooms: RoomType[] = [
-  { id: '101', type: 'Standard', price: '150,000', status: 'Available', floor: '1st Floor', image: 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80&w=400' },
-  { id: '102', type: 'Standard', price: '150,000', status: 'Occupied', floor: '1st Floor', image: 'https://images.unsplash.com/photo-1611892440504-42a792e24d32?auto=format&fit=crop&q=80&w=400' },
-  { id: '201', type: 'Deluxe', price: '250,000', status: 'Cleaning', floor: '2nd Floor', image: 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&q=80&w=400' },
-];
-
 const Rooms: React.FC = () => {
-  const [rooms, setRooms] = useState<RoomType[]>(initialRooms);
+  const [rooms, setRooms] = useState<RoomType[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
   const [newRoom, setNewRoom] = useState<Partial<RoomType>>({ id: '', type: 'Standard', price: '', floor: '1st Floor', image: '' });
 
-  // Handle room image upload from device
+  const fetchRooms = async () => {
+    const { data, error } = await supabase.from('rooms').select('*').order('id');
+    if (error) showError(error.message);
+    else setRooms(data as RoomType[]);
+  };
+
+  useEffect(() => {
+    fetchRooms();
+  }, []);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -49,27 +53,42 @@ const Rooms: React.FC = () => {
     }
   };
 
-  const handleAddRoom = (e: React.FormEvent) => {
+  const handleAddRoom = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRoom.id || !newRoom.price || !newRoom.type || !newRoom.floor) return;
-    const roomToAdd: RoomType = {
-      id: newRoom.id!,
-      type: newRoom.type!,
-      price: newRoom.price!,
-      floor: newRoom.floor!,
+    
+    const roomToAdd = {
+      id: newRoom.id,
+      type: newRoom.type,
+      price: parseFloat(newRoom.price.replace(/,/g, '')),
+      floor: newRoom.floor,
       status: 'Available',
       image: newRoom.image || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=400'
     };
-    setRooms([...rooms, roomToAdd]);
-    setIsAddModalOpen(false);
-    showSuccess(`Room ${newRoom.id} added successfully!`);
-    setNewRoom({ id: '', type: 'Standard', price: '', floor: '1st Floor', image: '' });
+
+    const { error } = await supabase.from('rooms').insert([roomToAdd]);
+    
+    if (error) {
+      showError(error.message);
+    } else {
+      setIsAddModalOpen(false);
+      showSuccess(`Room ${newRoom.id} added successfully!`);
+      setNewRoom({ id: '', type: 'Standard', price: '', floor: '1st Floor', image: '' });
+      fetchRooms();
+    }
   };
 
-  const handleDeleteRoom = () => {
-    setRooms(rooms.filter(r => r.id !== selectedRoomId));
-    setIsDeleteModalOpen(false);
-    showSuccess(`Room ${selectedRoomId} deleted successfully.`);
+  const handleDeleteRoom = async () => {
+    if (!selectedRoomId) return;
+    const { error } = await supabase.from('rooms').delete().eq('id', selectedRoomId);
+    
+    if (error) {
+      showError(error.message);
+    } else {
+      setIsDeleteModalOpen(false);
+      showSuccess(`Room ${selectedRoomId} deleted successfully.`);
+      fetchRooms();
+    }
   };
 
   return (
@@ -108,7 +127,7 @@ const Rooms: React.FC = () => {
                 </div>
                 <p className="text-xs text-slate-500 mb-4">{room.type} • {room.floor}</p>
                 <div className="flex justify-between items-center">
-                  <span className="font-bold text-blue-600">UGX {room.price}</span>
+                  <span className="font-bold text-blue-600">UGX {room.price.toLocaleString()}</span>
                   <Button variant="ghost" size="sm" className="text-slate-400 hover:text-blue-600">
                     <Edit3 size={14} className="mr-1" /> Edit
                   </Button>
@@ -118,7 +137,6 @@ const Rooms: React.FC = () => {
           ))}
         </div>
 
-        {/* Add Room Modal */}
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
           <DialogContent>
             <DialogHeader><DialogTitle>Add New Room</DialogTitle></DialogHeader>

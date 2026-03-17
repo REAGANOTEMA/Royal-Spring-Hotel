@@ -1,8 +1,6 @@
-// src/App.tsx
-
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -30,31 +28,42 @@ import Messages from "./pages/Messages";
 import Security from "./pages/Security";
 import Media from "./pages/Media";
 import Profile from "./pages/Profile";
+import Accountant from "./pages/Accountant";
+import UserManagement from "./pages/UserManagement";
 import NotFound from "./pages/NotFound";
 
 // Supabase client
-import { supabase } from "@/lib/supabaseClient";
-
-// Private route guard
-const PrivateRoute = ({ children }: { children: JSX.Element }) => {
-  const user = supabase.auth.getUser(); // check login
-  if (!user) return <Navigate to="/login" replace />;
-  return children;
-};
+import { supabase } from "@/lib/supabase";
 
 const queryClient = new QueryClient();
 
+const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
+  const [session, setSession] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (loading) return <div className="h-screen w-screen flex items-center justify-center">Loading...</div>;
+  if (!session) return <Navigate to="/login" replace />;
+  
+  return <>{children}</>;
+};
+
 const App: React.FC = () => {
-  // Accessing environment variables
-  const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-  const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-
-  console.log(supabaseUrl, supabaseAnonKey); // Debugging purposes to ensure they're accessible
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        {/* Global Toasts */}
         <Toaster />
         <Sonner />
 
@@ -68,14 +77,7 @@ const App: React.FC = () => {
             <Route path="/help" element={<Help />} />
 
             {/* Private / App Pages */}
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute>
-                  <Dashboard />
-                </PrivateRoute>
-              }
-            />
+            <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/rooms" element={<PrivateRoute><Rooms /></PrivateRoute>} />
             <Route path="/inventory" element={<PrivateRoute><Inventory /></PrivateRoute>} />
             <Route path="/bookings" element={<PrivateRoute><Bookings /></PrivateRoute>} />
@@ -90,6 +92,8 @@ const App: React.FC = () => {
             <Route path="/security" element={<PrivateRoute><Security /></PrivateRoute>} />
             <Route path="/media" element={<PrivateRoute><Media /></PrivateRoute>} />
             <Route path="/profile" element={<PrivateRoute><Profile /></PrivateRoute>} />
+            <Route path="/accountant" element={<PrivateRoute><Accountant /></PrivateRoute>} />
+            <Route path="/users" element={<PrivateRoute><UserManagement /></PrivateRoute>} />
 
             {/* 404 Fallback */}
             <Route path="*" element={<NotFound />} />
