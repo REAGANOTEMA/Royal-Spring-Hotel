@@ -6,8 +6,8 @@
     <title>Royal Spring Hotel</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/logo.png" />
-    <link rel="apple-touch-icon" href="/logo.png" />
+    <link rel="icon" type="image/png" href="./logo.png" />
+    <link rel="apple-touch-icon" href="./logo.png" />
 
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -34,13 +34,14 @@
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
 
-    <!-- Tailwind / global styles are imported via React, no <link> needed here -->
+    <!-- Tailwind / global styles are imported via React -->
   </head>
 
   <body class="bg-slate-50 font-sans">
     <!-- React app root -->
     <div id="root"></div>
 
-    <!-- Vite injects the compiled JS automatically; no manual script needed -->
+    <!-- Vite will inject JS automatically -->
+    <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>
