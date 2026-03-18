@@ -2,10 +2,16 @@
 import { createClient } from '@supabase/supabase-js';
 
 // Server-only keys (Note: These should be in environment variables)
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL!;
-const SUPABASE_SERVICE_KEY = import.meta.env.SUPABASE_SERVICE_ROLE_KEY!;
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || "";
+const SUPABASE_SERVICE_KEY = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || "";
 
-const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+// Initialize lazily or with placeholders to prevent crash on module load
+const getSupabaseAdmin = () => {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
+    throw new Error("Supabase Admin keys are missing. Please check your environment variables.");
+  }
+  return createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
+};
 
 export const createUser = async (reqBody: any) => {
   try {
@@ -19,6 +25,8 @@ export const createUser = async (reqBody: any) => {
     if (!allowedRoles.includes(role)) {
       throw new Error('Invalid role specified.');
     }
+
+    const supabaseAdmin = getSupabaseAdmin();
 
     // Check how many users exist for this role
     const { data: existingUsers, error: userError } = await supabaseAdmin
