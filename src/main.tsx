@@ -4,11 +4,10 @@ import React from "react";
 import { createRoot } from "react-dom/client";
 import App from "./App"; // Main App component
 import "./globals.css"; // Tailwind global styles
-import { supabase } from "./lib/supabaseClient"; // Supabase client
 
-// Ensure environment variables exist
-if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-  throw new Error("Supabase environment variables are missing!");
+// Ensure environment variables exist using Vite's import.meta.env
+if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
+  throw new Error("Supabase environment variables are missing! Please ensure VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are set in your .env file.");
 }
 
 // Root container

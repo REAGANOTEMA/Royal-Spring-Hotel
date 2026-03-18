@@ -3,10 +3,10 @@ import { createClient, SupabaseClient, Session } from '@supabase/supabase-js';
 
 /**
  * Initialize Supabase client (frontend-safe)
- * Uses NEXT_PUBLIC_ environment variables for URL & anon key
+ * Uses VITE_ environment variables for URL & anon key
  */
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY!;
 
 export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
@@ -101,8 +101,8 @@ export const uploadDocument = async (
   category: string,
   url: string
 ) => {
-  const user = await getUserSession();
-  if (!user) throw new Error('User not logged in');
+  const session = await getUserSession();
+  if (!session) throw new Error('User not logged in');
 
   const { data, error } = await supabase
     .from('documents')
@@ -111,7 +111,7 @@ export const uploadDocument = async (
         name,
         category,
         url,
-        uploaded_by: user.user.id, // stores auth.uid()
+        uploaded_by: session.user.id, // stores auth.uid()
       },
     ]);
   if (error) throw error;
