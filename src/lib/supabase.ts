@@ -6,10 +6,15 @@ import { createClient, SupabaseClient, Session, User } from '@supabase/supabase-
  * Initialize Supabase client (frontend-safe)
  * Uses VITE_ environment variables for URL & anon key
  */
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL!;
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY!;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
-export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
+// Only initialize if keys are present to avoid immediate crash
+// The app will show a clearer error via the check in main.tsx
+export const supabase: SupabaseClient = createClient(
+  supabaseUrl || 'https://placeholder.supabase.co', 
+  supabaseKey || 'placeholder'
+);
 
 /**
  * ==============================
