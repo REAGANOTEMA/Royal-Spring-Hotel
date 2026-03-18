@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import Sidebar from "@/components/Sidebar";
 import Footer from "@/components/Footer";
+import VoiceConcierge from "@/components/VoiceConcierge";
 import { 
   LayoutDashboard, 
   BedDouble, 
@@ -37,7 +38,8 @@ const Dashboard = () => {
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
 
   useEffect(() => {
-    setUserName(localStorage.getItem('userName') || 'Executive');
+    const name = localStorage.getItem('userName') || 'Executive';
+    setUserName(name);
     
     const fetchDashboardData = async () => {
       const today = new Date().toISOString().split('T')[0];
@@ -240,6 +242,7 @@ const Dashboard = () => {
         </div>
         <Footer />
       </main>
+      <VoiceConcierge context="staff" userName={userName} />
     </div>
   );
 };

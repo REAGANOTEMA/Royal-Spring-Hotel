@@ -7,6 +7,7 @@ import { Star, Menu, Palmtree, Utensils, BedDouble, Camera, Leaf, Waves, ShieldC
 import { Button } from '@/components/ui/button';
 import Footer from '@/components/Footer';
 import AIChat from '@/components/AIChat';
+import VoiceConcierge from '@/components/VoiceConcierge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 
@@ -158,6 +159,7 @@ const Index = () => {
 
       <Footer />
       <AIChat />
+      <VoiceConcierge context="guest" />
     </div>
   );
 };
