@@ -79,7 +79,7 @@ const Reports: React.FC = () => {
         </header>
 
         <div className="p-8 space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:md:grid-cols-4 gap-6">
             {kpis.map((kpi, i) => (
               <Card key={i} className="border-none shadow-lg bg-white">
                 <CardContent className="p-6 flex items-center gap-4">
