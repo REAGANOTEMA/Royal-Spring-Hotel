@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Menu, Palmtree, Utensils, BedDouble, Camera, Leaf, Waves, ShieldCheck } from 'lucide-react';
+import { Star, Menu, Palmtree, Utensils, BedDouble, Camera, Leaf, Waves, ShieldCheck, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Footer from '@/components/Footer';
 import AIChat from '@/components/AIChat';
@@ -28,6 +28,15 @@ const heroSlides = [
   },
 ];
 
+const galleryImages = [
+  'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=800',
+  'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=800',
+  'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
+  'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80&w=800',
+  'https://images.unsplash.com/photo-1551882547-ff43c63e1c04?auto=format&fit=crop&q=80&w=800',
+  'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&q=80&w=800',
+];
+
 const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
@@ -48,7 +57,7 @@ const Index = () => {
 
         <div className="hidden lg:flex items-center gap-8">
           <a href="#experience" className="text-sm font-bold text-slate-600 hover:text-blue-700 transition-colors uppercase tracking-widest">Experience</a>
-          <a href="#dining" className="text-sm font-bold text-slate-600 hover:text-blue-700 transition-colors uppercase tracking-widest">Dining</a>
+          <a href="#gallery" className="text-sm font-bold text-slate-600 hover:text-blue-700 transition-colors uppercase tracking-widest">Gallery</a>
           <Link to="/login">
             <Button variant="outline" className="border-blue-700 text-blue-700 hover:bg-blue-50 font-black rounded-xl">STAFF PORTAL</Button>
           </Link>
@@ -94,29 +103,55 @@ const Index = () => {
           </motion.p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/book"><Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-xl px-12 h-16 font-black rounded-2xl shadow-2xl">RESERVE NOW</Button></Link>
-            <Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-md border-white text-white hover:bg-white hover:text-slate-900 text-xl px-12 h-16 font-black rounded-2xl">EXPLORE GARDENS</Button>
+            <a href="#gallery"><Button size="lg" variant="outline" className="bg-white/10 backdrop-blur-md border-white text-white hover:bg-white hover:text-slate-900 text-xl px-12 h-16 font-black rounded-2xl">EXPLORE GALLERY</Button></a>
           </div>
         </div>
       </section>
 
-      <section className="py-24 bg-slate-50">
+      <section id="experience" className="py-32 bg-slate-50">
         <div className="container mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tighter uppercase">The Royal Experience</h2>
+            <p className="text-slate-500 text-lg font-medium">Discover a sanctuary where luxury meets nature. Our resort is designed to provide an unforgettable escape from the ordinary.</p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-            <div className="text-center space-y-4">
-              <div className="w-20 h-20 bg-blue-100 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6"><Palmtree size={40} /></div>
-              <h3 className="text-2xl font-black">Lush Gardens</h3>
-              <p className="text-slate-500">Acres of meticulously maintained tropical vegetation and serene walking paths.</p>
+            <div className="text-center space-y-4 group">
+              <div className="w-24 h-24 bg-blue-100 text-blue-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 transition-transform group-hover:scale-110 duration-500"><Palmtree size={48} /></div>
+              <h3 className="text-2xl font-black uppercase tracking-tight">Lush Gardens</h3>
+              <p className="text-slate-500 leading-relaxed">Acres of meticulously maintained tropical vegetation and serene walking paths for your peace of mind.</p>
             </div>
-            <div className="text-center space-y-4">
-              <div className="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-6"><BedDouble size={40} /></div>
-              <h3 className="text-2xl font-black">Luxury Suites</h3>
-              <p className="text-slate-500">Experience the pinnacle of comfort with our premium bedding and garden views.</p>
+            <div className="text-center space-y-4 group">
+              <div className="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 transition-transform group-hover:scale-110 duration-500"><BedDouble size={48} /></div>
+              <h3 className="text-2xl font-black uppercase tracking-tight">Luxury Suites</h3>
+              <p className="text-slate-500 leading-relaxed">Experience the pinnacle of comfort with our premium bedding, garden views, and world-class amenities.</p>
             </div>
-            <div className="text-center space-y-4">
-              <div className="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mx-auto mb-6"><Utensils size={40} /></div>
-              <h3 className="text-2xl font-black">Fine Dining</h3>
-              <p className="text-slate-500">Authentic Ugandan delicacies and international gourmet cuisine served in our garden.</p>
+            <div className="text-center space-y-4 group">
+              <div className="w-24 h-24 bg-amber-100 text-amber-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 transition-transform group-hover:scale-110 duration-500"><Utensils size={48} /></div>
+              <h3 className="text-2xl font-black uppercase tracking-tight">Fine Dining</h3>
+              <p className="text-slate-500 leading-relaxed">Authentic Ugandan delicacies and international gourmet cuisine served in our breathtaking garden setting.</p>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="gallery" className="py-32 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+            <div className="max-w-2xl">
+              <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tighter uppercase">Visual Journey</h2>
+              <p className="text-slate-500 text-lg font-medium">A glimpse into the elegance and serenity that awaits you at Royal Springs Resort.</p>
+            </div>
+            <Button variant="outline" className="border-slate-200 font-black rounded-xl h-14 px-8">VIEW ALL PHOTOS <ChevronRight size={18} className="ml-2" /></Button>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {galleryImages.map((img, i) => (
+              <motion.div key={i} whileHover={{ y: -10 }} className="relative h-80 rounded-[2.5rem] overflow-hidden shadow-2xl group">
+                <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
+                  <p className="text-white font-black uppercase tracking-widest text-sm">Royal Springs View</p>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>

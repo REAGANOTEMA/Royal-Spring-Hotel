@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BedDouble, CalendarCheck, Users, Package, BarChart3, UserCog, AlertCircle, LogOut, Receipt, Briefcase, FileBarChart, MessageSquare, ShieldAlert, ImageIcon, Menu, ShieldCheck, UtensilsCrossed, Sparkles, Wrench, Banknote } from 'lucide-react';
+import { LayoutDashboard, BedDouble, CalendarCheck, Users, Package, BarChart3, UserCog, AlertCircle, LogOut, Receipt, Briefcase, FileBarChart, MessageSquare, ShieldAlert, ImageIcon, Menu, ShieldCheck, UtensilsCrossed, Sparkles, Wrench, Banknote, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -28,6 +28,7 @@ const SidebarContent = ({ role, userName, location, onClose }: any) => {
     { icon: ImageIcon, label: 'MEDIA', path: '/media', roles: ['director', 'gm'] },
     { icon: ShieldAlert, label: 'SECURITY', path: '/security', roles: ['director'] },
     { icon: AlertCircle, label: 'INCIDENTS', path: '/incidents', roles: ['director', 'gm', 'staff'] },
+    { icon: Settings, label: 'SETTINGS', path: '/settings', roles: ['director'] },
   ];
 
   const filteredItems = menuItems.filter(item => role && item.roles.includes(role));
@@ -102,7 +103,7 @@ const Sidebar = () => {
       <div className="lg:hidden fixed top-4 left-4 z-[60]">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild><Button variant="outline" size="icon" className="bg-slate-950 border-slate-800 text-white"><Menu size={24} /></Button></SheetTrigger>
-          <SheetContent side="left" className="p-0 w-72 border-r border-slate-800"><SidebarContent role={role} userName={userName} location={location} onClose={() => setIsOpen(false)} /></SheetContent>
+          <SheetContent side="left" className="p-0 w-72 border-r border-slate-800"><SidebarContent role={role} userName={userName} location={location} onClose={() => setIsOpen(false)} /></SidebarContent>
         </Sheet>
       </div>
     </>
