@@ -9,8 +9,10 @@ import { createClient, SupabaseClient, Session, User } from '@supabase/supabase-
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-// Use a valid placeholder URL if the environment variable is missing to prevent the 'required' error
-// The app will still show a configuration error via the check in main.tsx
+// If keys are missing, we use a dummy URL that won't crash the initialization
+// but will fail gracefully during actual requests with a clear error.
+const isConfigured = Boolean(supabaseUrl && supabaseKey);
+
 export const supabase: SupabaseClient = createClient(
   supabaseUrl || 'https://placeholder-project.supabase.co', 
   supabaseKey || 'placeholder-key'
@@ -24,6 +26,7 @@ export const supabase: SupabaseClient = createClient(
 
 /** Sign up a new user */
 export const signUp = async (email: string, password: string) => {
+  if (!isConfigured) throw new Error("Supabase is not connected. Please click 'Add Supabase' in the editor.");
   const { data, error } = await supabase.auth.signUp({ email, password });
   if (error) throw error;
   return data;
@@ -31,6 +34,7 @@ export const signUp = async (email: string, password: string) => {
 
 /** Sign in an existing user */
 export const signIn = async (email: string, password: string) => {
+  if (!isConfigured) throw new Error("Supabase is not connected. Please click 'Add Supabase' in the editor.");
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
   return data;
@@ -45,6 +49,7 @@ export const signOut = async () => {
 
 /** Get current user session */
 export const getUserSession = async (): Promise<Session | null> => {
+  if (!isConfigured) return null;
   const { data } = await supabase.auth.getSession();
   return data.session;
 };
@@ -77,6 +82,7 @@ export const changeUserEmail = async (newEmail: string) => {
 
 /** Fetch all rooms */
 export const fetchRooms = async () => {
+  if (!isConfigured) return [];
   const { data, error } = await supabase.from('rooms').select('*');
   if (error) throw error;
   return data;
@@ -84,6 +90,7 @@ export const fetchRooms = async () => {
 
 /** Fetch all inventory items */
 export const fetchInventory = async () => {
+  if (!isConfigured) return [];
   const { data, error } = await supabase.from('inventory').select('*');
   if (error) throw error;
   return data;
@@ -91,46 +98,8 @@ export const fetchInventory = async () => {
 
 /** Fetch audit logs */
 export const fetchAuditLogs = async () => {
+  if (!isConfigured) return [];
   const { data, error } = await supabase.from('audit_logs').select('*');
-  if (error) throw error;
-  return data;
-};
-
-/** Upload a document (auto-assigns logged-in user as uploader) */
-export const uploadDocument = async (
-  name: string,
-  category: string,
-  url: string
-) => {
-  const user = await getUser();
-  if (!user) throw new Error('User not logged in');
-
-  const { data, error } = await supabase
-    .from('documents')
-    .insert([{ name, category, url, uploaded_by: user.id }]);
-  if (error) throw error;
-  return data;
-};
-
-/** Update a document (only the uploader can update) */
-export const updateDocument = async (
-  docId: string,
-  updateFields: Partial<{ name: string; category: string; url: string }>
-) => {
-  const { data, error } = await supabase
-    .from('documents')
-    .update(updateFields)
-    .eq('id', docId);
-  if (error) throw error;
-  return data;
-};
-
-/** Delete a document (only the uploader can delete) */
-export const deleteDocument = async (docId: string) => {
-  const { data, error } = await supabase
-    .from('documents')
-    .delete()
-    .eq('id', docId);
   if (error) throw error;
   return data;
 };
