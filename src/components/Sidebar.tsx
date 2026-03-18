@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, BedDouble, CalendarCheck, Users, Package, BarChart3, UserCog, AlertCircle, LogOut, Receipt, Briefcase, FileBarChart, MessageSquare, ShieldAlert, ImageIcon, Menu, ShieldCheck } from 'lucide-react';
+import { LayoutDashboard, BedDouble, CalendarCheck, Users, Package, BarChart3, UserCog, AlertCircle, LogOut, Receipt, Briefcase, FileBarChart, MessageSquare, ShieldAlert, ImageIcon, Menu, ShieldCheck, UtensilsCrossed } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ const SidebarContent = ({ role, userName, location, onClose }: any) => {
     { icon: BedDouble, label: 'ROOMS', path: '/rooms', roles: ['director', 'gm', 'staff'] },
     { icon: CalendarCheck, label: 'BOOKINGS', path: '/bookings', roles: ['director', 'gm', 'staff'] },
     { icon: Receipt, label: 'BILLING', path: '/billing', roles: ['director', 'gm', 'accountant', 'staff'] },
+    { icon: UtensilsCrossed, label: 'KITCHEN', path: '/kitchen', roles: ['director', 'gm', 'chef'] },
     { icon: Users, label: 'GUESTS', path: '/guests', roles: ['director', 'gm', 'staff'] },
     { icon: Package, label: 'INVENTORY', path: '/inventory', roles: ['director', 'gm', 'accountant'] },
     { icon: BarChart3, label: 'FINANCE', path: '/finance', roles: ['director', 'gm', 'accountant'] },
@@ -98,7 +99,7 @@ const Sidebar = () => {
       <div className="lg:hidden fixed top-4 left-4 z-[60]">
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
           <SheetTrigger asChild><Button variant="outline" size="icon" className="bg-slate-950 border-slate-800 text-white"><Menu size={24} /></Button></SheetTrigger>
-          <SheetContent side="left" className="p-0 w-72 border-r border-slate-800"><SidebarContent role={role} userName={userName} location={location} onClose={() => setIsOpen(false)} /></SheetContent>
+          <SheetContent side="left" className="p-0 w-72 border-r border-slate-800"><SidebarContent role={role} userName={userName} location={location} onClose={() => setIsOpen(false)} /></SidebarContent>
         </Sheet>
       </div>
     </>
