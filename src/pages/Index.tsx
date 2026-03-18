@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Menu, Palmtree, Utensils, BedDouble, Camera, Leaf, Waves, ShieldCheck, ChevronRight } from 'lucide-react';
+import { Star, Menu, Palmtree, Utensils, BedDouble, Camera, Leaf, Waves, ShieldCheck, ChevronRight, Quote, MapPin, Phone, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Footer from '@/components/Footer';
 import AIChat from '@/components/AIChat';
@@ -29,13 +29,25 @@ const heroSlides = [
   },
 ];
 
-const galleryImages = [
-  'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1551882547-ff43c63e1c04?auto=format&fit=crop&q=80&w=800',
-  'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&q=80&w=800',
+const testimonials = [
+  {
+    name: "Sarah Johnson",
+    role: "Luxury Traveler",
+    text: "The most peaceful stay I've ever had. The gardens are truly a sanctuary for the soul.",
+    avatar: "https://i.pravatar.cc/150?u=sarah"
+  },
+  {
+    name: "David Okello",
+    role: "Business Executive",
+    text: "World-class service and impeccable attention to detail. Royal Springs is my home in Kampala.",
+    avatar: "https://i.pravatar.cc/150?u=david"
+  },
+  {
+    name: "Elena Rodriguez",
+    role: "Nature Enthusiast",
+    text: "A perfect blend of luxury and nature. The dining experience under the palms is unforgettable.",
+    avatar: "https://i.pravatar.cc/150?u=elena"
+  }
 ];
 
 const Index = () => {
@@ -82,6 +94,7 @@ const Index = () => {
         </div>
       </nav>
 
+      {/* Hero Section */}
       <section className="relative h-[90vh] flex items-center justify-center overflow-hidden bg-slate-900">
         <AnimatePresence mode="wait">
           <motion.div key={currentSlide} initial={{ opacity: 0, scale: 1.1 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.5 }} className="absolute inset-0 z-0">
@@ -109,6 +122,7 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Experience Section */}
       <section id="experience" className="py-32 bg-slate-50">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-20">
@@ -135,24 +149,78 @@ const Index = () => {
         </div>
       </section>
 
-      <section id="gallery" className="py-32 bg-white">
-        <div className="container mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-            <div className="max-w-2xl">
-              <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tighter uppercase">Visual Journey</h2>
-              <p className="text-slate-500 text-lg font-medium">A glimpse into the elegance and serenity that awaits you at Royal Springs Resort.</p>
-            </div>
-            <Button variant="outline" className="border-slate-200 font-black rounded-xl h-14 px-8">VIEW ALL PHOTOS <ChevronRight size={18} className="ml-2" /></Button>
+      {/* Testimonials Section */}
+      <section className="py-32 bg-slate-900 text-white overflow-hidden relative">
+        <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
+          <Quote size={400} className="absolute -top-20 -left-20" />
+        </div>
+        <div className="container mx-auto px-6 relative z-10">
+          <div className="text-center mb-20">
+            <h2 className="text-4xl md:text-6xl font-black mb-6 tracking-tighter uppercase">Royal Voices</h2>
+            <p className="text-slate-400 text-lg font-medium">What our distinguished guests have to say about their stay.</p>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-            {galleryImages.map((img, i) => (
-              <motion.div key={i} whileHover={{ y: -10 }} className="relative h-80 rounded-[2.5rem] overflow-hidden shadow-2xl group">
-                <img src={img} alt={`Gallery ${i}`} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex items-end p-8">
-                  <p className="text-white font-black uppercase tracking-widest text-sm">Royal Springs View</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {testimonials.map((t, i) => (
+              <motion.div key={i} whileHover={{ y: -10 }} className="bg-white/5 backdrop-blur-lg p-10 rounded-[3rem] border border-white/10">
+                <Quote className="text-blue-500 mb-6" size={40} />
+                <p className="text-xl text-slate-300 mb-8 italic font-medium">"{t.text}"</p>
+                <div className="flex items-center gap-4">
+                  <img src={t.avatar} alt={t.name} className="w-14 h-14 rounded-2xl object-cover" />
+                  <div>
+                    <h4 className="font-black uppercase tracking-tight">{t.name}</h4>
+                    <p className="text-xs text-blue-500 font-black uppercase tracking-widest">{t.role}</p>
+                  </div>
                 </div>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Location Section */}
+      <section className="py-32 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+            <div className="space-y-10">
+              <div>
+                <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tighter uppercase">Find Paradise</h2>
+                <p className="text-slate-500 text-lg font-medium">Located in the heart of Uganda's natural beauty, Royal Springs Resort is easily accessible yet worlds away.</p>
+              </div>
+              <div className="space-y-6">
+                <div className="flex items-start gap-6">
+                  <div className="p-4 bg-blue-50 text-blue-600 rounded-2xl"><MapPin size={28} /></div>
+                  <div>
+                    <h4 className="font-black uppercase tracking-tight text-slate-900">Our Address</h4>
+                    <p className="text-slate-500">Royal Springs Resort, Kampala, Uganda</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-6">
+                  <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl"><Phone size={28} /></div>
+                  <div>
+                    <h4 className="font-black uppercase tracking-tight text-slate-900">Call Us</h4>
+                    <p className="text-slate-500">+256 772 514 889</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-6">
+                  <div className="p-4 bg-amber-50 text-amber-600 rounded-2xl"><Mail size={28} /></div>
+                  <div>
+                    <h4 className="font-black uppercase tracking-tight text-slate-900">Email Us</h4>
+                    <p className="text-slate-500">info@royalspringsresort.com</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="h-[500px] rounded-[3rem] overflow-hidden shadow-2xl border-8 border-slate-50">
+              <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d127672.8716362986!2d32.5138415!3d0.3136111!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x177dbb91593c7867%3A0x3c8a33882516283!2sKampala%2C%20Uganda!5e0!3m2!1sen!2sus!4v1710000000000!5m2!1sen!2sus" 
+                width="100%" 
+                height="100%" 
+                style={{ border: 0 }} 
+                allowFullScreen 
+                loading="lazy" 
+                referrerPolicy="no-referrer-when-downgrade"
+              />
+            </div>
           </div>
         </div>
       </section>
