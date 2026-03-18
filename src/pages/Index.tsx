@@ -14,7 +14,8 @@ import {
   BedDouble,
   Camera,
   Palmtree,
-  Coffee
+  Coffee,
+  Pizza
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -25,24 +26,29 @@ import { cn } from '@/lib/utils';
 
 const heroSlides = [
   {
-    url: 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=2000',
+    url: 'https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&q=80&w=2000',
     title: 'Royal Spring Hotel Iganga',
-    subtitle: 'Experience the pinnacle of luxury in the heart of nature.',
+    subtitle: 'A sanctuary of luxury nestled within lush tropical greenery.',
   },
   {
-    url: 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80&w=2000',
-    title: 'Lush Green Compounds',
-    subtitle: 'Serene environments designed for your ultimate relaxation.',
+    url: 'https://images.unsplash.com/photo-1584132967334-10e028bd69f7?auto=format&fit=crop&q=80&w=2000',
+    title: 'Sparkling Infinity Pool',
+    subtitle: 'Refresh your senses in our crystal-clear waters surrounded by nature.',
   },
   {
-    url: 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&q=80&w=2000',
-    title: 'Exquisite Comfort',
-    subtitle: 'Meticulously designed rooms with premium amenities.',
+    url: 'https://images.unsplash.com/photo-1604329760661-e71dc83f8f26?auto=format&fit=crop&q=80&w=2000',
+    title: 'Aromatic Ugandan Delicacies',
+    subtitle: 'Savor the authentic flavors of the pearl of Africa, prepared to perfection.',
   },
   {
-    url: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&q=80&w=2000',
-    title: 'Gourmet Dining',
-    subtitle: 'Savor world-class delicacies prepared by our master chefs.',
+    url: 'https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&q=80&w=2000',
+    title: 'Exquisite Snacks & Bites',
+    subtitle: 'Delight in our selection of gourmet snacks and refreshing treats.',
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=2000',
+    title: 'Serene Garden Relaxation',
+    subtitle: 'Find peace in our meticulously manicured vegetation compounds.',
   },
 ];
 
@@ -50,7 +56,7 @@ const experienceCards = [
   {
     title: "Lush Vegetation",
     desc: "Explore our serene compounds surrounded by nature's finest greenery and tropical flora.",
-    image: "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&q=80&w=800",
+    image: "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?auto=format&fit=crop&q=80&w=800",
     icon: Leaf,
     color: "bg-emerald-600"
   },
