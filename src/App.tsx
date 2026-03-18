@@ -42,19 +42,28 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setLoading(false);
     });
 
+    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
+      if (session) {
+        // Persist role and name for UI consistency
+        const role = session.user.user_metadata?.role || 'staff';
+        const name = session.user.user_metadata?.full_name || session.user.email?.split('@')[0];
+        localStorage.setItem("userRole", role);
+        localStorage.setItem("userName", name || 'Staff');
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  if (loading) return <div className="h-screen w-screen flex items-center justify-center">Loading...</div>;
+  if (loading) return <div className="h-screen w-screen flex items-center justify-center bg-slate-50 font-bold text-blue-600">Loading Royal Springs...</div>;
   if (!session) return <Navigate to="/login" replace />;
   
   return <>{children}</>;

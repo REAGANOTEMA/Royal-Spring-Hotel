@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/Sidebar';
 import Footer from '@/components/Footer';
 import DeleteDialog from '@/components/DeleteDialog';
-import { Bed, Plus, Trash2, Edit3, MapPin, DollarSign, Layers } from 'lucide-react';
+import { Bed, Plus, Trash2, Edit3, Layers, Star } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +19,7 @@ import { supabase } from '@/lib/supabase';
 interface RoomType {
   id: string;
   type: string;
-  price: string;
+  price: number;
   status: string;
   floor: string;
   image: string;
@@ -30,7 +30,7 @@ const Rooms: React.FC = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedRoomId, setSelectedRoomId] = useState<string | null>(null);
-  const [newRoom, setNewRoom] = useState<Partial<RoomType>>({ id: '', type: 'Standard', price: '', floor: '1st Floor', image: '' });
+  const [newRoom, setNewRoom] = useState<Partial<RoomType>>({ id: '', type: 'Standard', price: 0, floor: '1st Floor', image: '' });
 
   const fetchRooms = async () => {
     const { data, error } = await supabase.from('rooms').select('*').order('id');
@@ -42,17 +42,6 @@ const Rooms: React.FC = () => {
     fetchRooms();
   }, []);
 
-  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setNewRoom({ ...newRoom, image: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
   const handleAddRoom = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newRoom.id || !newRoom.price || !newRoom.type || !newRoom.floor) return;
@@ -60,10 +49,10 @@ const Rooms: React.FC = () => {
     const roomToAdd = {
       id: newRoom.id,
       type: newRoom.type,
-      price: parseFloat(newRoom.price.replace(/,/g, '')),
+      price: Number(newRoom.price),
       floor: newRoom.floor,
       status: 'Available',
-      image: newRoom.image || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=400'
+      image: newRoom.image || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=800'
     };
 
     const { error } = await supabase.from('rooms').insert([roomToAdd]);
@@ -73,7 +62,7 @@ const Rooms: React.FC = () => {
     } else {
       setIsAddModalOpen(false);
       showSuccess(`Room ${newRoom.id} added successfully!`);
-      setNewRoom({ id: '', type: 'Standard', price: '', floor: '1st Floor', image: '' });
+      setNewRoom({ id: '', type: 'Standard', price: 0, floor: '1st Floor', image: '' });
       fetchRooms();
     }
   };
@@ -112,39 +101,46 @@ const Rooms: React.FC = () => {
 
         <div className="p-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {rooms.map(room => (
-            <Card key={room.id} className="overflow-hidden border-none shadow-xl hover:shadow-2xl transition-all duration-500 bg-white group rounded-[2rem]">
-              <div className="relative h-56 overflow-hidden">
+            <Card key={room.id} className="overflow-hidden border-none shadow-xl hover:shadow-2xl transition-all duration-500 bg-white group rounded-[2.5rem]">
+              <div className="relative h-64 overflow-hidden">
                 <img src={room.image} alt={room.id} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+                
                 <div className="absolute top-4 right-4 flex gap-2">
-                  <Button size="icon" variant="destructive" className="h-10 w-10 rounded-xl shadow-lg" onClick={() => { setSelectedRoomId(room.id); setIsDeleteModalOpen(true); }}>
+                  <Button size="icon" variant="destructive" className="h-10 w-10 rounded-xl shadow-lg opacity-0 group-hover:opacity-100 transition-opacity" onClick={() => { setSelectedRoomId(room.id); setIsDeleteModalOpen(true); }}>
                     <Trash2 size={16} />
                   </Button>
                 </div>
-                <Badge className={cn("absolute bottom-4 left-4 px-3 py-1 font-black uppercase tracking-widest text-[10px] rounded-lg shadow-lg",
-                  room.status === 'Available' ? "bg-emerald-500 text-white" :
-                  room.status === 'Occupied' ? "bg-red-500 text-white" :
-                  "bg-amber-500 text-white"
-                )}>{room.status}</Badge>
+
+                <div className="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                  <Badge className={cn("px-3 py-1 font-black uppercase tracking-widest text-[10px] rounded-lg shadow-lg border-none",
+                    room.status === 'Available' ? "bg-emerald-500 text-white" :
+                    room.status === 'Occupied' ? "bg-red-500 text-white" :
+                    "bg-amber-500 text-white"
+                  )}>{room.status}</Badge>
+                  <div className="flex gap-0.5 text-amber-400">
+                    {[1, 2, 3, 4, 5].map(i => <Star key={i} size={12} fill="currentColor" />)}
+                  </div>
+                </div>
               </div>
               <CardContent className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <h3 className="font-black text-xl text-slate-900">Room {room.id}</h3>
+                    <h3 className="font-black text-2xl text-slate-900">Room {room.id}</h3>
                     <div className="flex items-center gap-1.5 text-slate-400 mt-1">
-                      <Layers size={12} />
-                      <span className="text-[10px] font-bold uppercase tracking-wider">{room.floor}</span>
+                      <Layers size={14} />
+                      <span className="text-xs font-bold uppercase tracking-wider">{room.floor}</span>
                     </div>
                   </div>
-                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 font-bold rounded-lg">{room.type}</Badge>
+                  <Badge variant="secondary" className="bg-blue-50 text-blue-700 font-bold rounded-lg px-3 py-1">{room.type}</Badge>
                 </div>
                 
-                <div className="pt-4 border-t flex justify-between items-center">
+                <div className="pt-6 border-t flex justify-between items-center">
                   <div className="flex flex-col">
                     <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nightly Rate</span>
-                    <span className="font-black text-blue-600 text-lg">UGX {room.price.toLocaleString()}</span>
+                    <span className="font-black text-blue-600 text-xl">UGX {room.price.toLocaleString()}</span>
                   </div>
-                  <Button variant="ghost" size="sm" className="text-slate-400 hover:text-blue-600 font-bold">
+                  <Button variant="outline" size="sm" className="rounded-xl font-bold border-slate-200 hover:border-blue-600 hover:text-blue-600">
                     <Edit3 size={14} className="mr-1" /> Edit
                   </Button>
                 </div>
@@ -154,7 +150,7 @@ const Rooms: React.FC = () => {
         </div>
 
         <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-          <DialogContent className="rounded-[2rem]">
+          <DialogContent className="rounded-[2.5rem] max-w-lg">
             <DialogHeader><DialogTitle className="text-2xl font-black">Add New Room</DialogTitle></DialogHeader>
             <form onSubmit={handleAddRoom} className="space-y-6 py-4">
               <div className="grid grid-cols-2 gap-4">
@@ -188,12 +184,12 @@ const Rooms: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <Label className="font-bold">Price (UGX)</Label>
-                  <Input value={newRoom.price} onChange={e => setNewRoom({...newRoom, price: e.target.value})} placeholder="150,000" className="h-12 rounded-xl" required />
+                  <Input type="number" value={newRoom.price} onChange={e => setNewRoom({...newRoom, price: Number(e.target.value)})} placeholder="150000" className="h-12 rounded-xl" required />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="font-bold">Upload Room Image</Label>
-                <Input type="file" accept="image/*" onChange={handleImageUpload} className="h-12 rounded-xl pt-2" />
+                <Label className="font-bold">Room Image URL</Label>
+                <Input value={newRoom.image} onChange={e => setNewRoom({...newRoom, image: e.target.value})} placeholder="https://images.unsplash.com/..." className="h-12 rounded-xl" />
               </div>
               <DialogFooter className="pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)} className="h-12 rounded-xl font-bold">Cancel</Button>
