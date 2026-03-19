@@ -32,6 +32,12 @@ if (import.meta.env.DEV) {
 
 export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey);
 
+// Expose for debugging and diagnostics
+export const supabaseConfig = {
+  url: supabaseUrl,
+  anonKeyLength: supabaseKey.length,
+};
+
 
 /**
  * ==============================

@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Label } from "@/components/ui/label";
 import { showSuccess, showError } from "@/utils/toast";
 import { cn } from "@/lib/utils";
-import { supabase } from "@/lib/supabase";
+import { supabase, supabaseConfig } from "@/lib/supabase";
 
 const roles = [
   { id: "director", label: "Director 👑", icon: Shield },
@@ -86,7 +86,17 @@ const AuthPage = () => {
       }
     } catch (err: any) {
       console.error("Auth Error:", err);
-      showError(err.message || "Authentication failed. Please try again.");
+      console.warn(
+        "Supabase config (for debugging):",
+        supabaseConfig.url,
+        "anon key length:",
+        supabaseConfig.anonKeyLength
+      );
+
+      showError(
+        (err?.message || "Authentication failed. Please try again.") +
+          "\n(See console for Supabase config details.)"
+      );
     } finally {
       setLoading(false);
     }
