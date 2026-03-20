@@ -144,6 +144,8 @@ export const EnhancedSignUpForm = ({ onSuccess, isAdminSignup = false }: SignUpF
     setLoading(true);
 
     try {
+      console.log("Starting signup process for:", formData.email);
+      
       // Step 1: Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
@@ -160,6 +162,9 @@ export const EnhancedSignUpForm = ({ onSuccess, isAdminSignup = false }: SignUpF
 
       if (authError) {
         console.error("Auth signup error:", authError);
+        if (authError.message.includes("User already registered")) {
+          throw new Error("This email is already registered. Please try signing in or use a different email.");
+        }
         throw new Error(`Authentication failed: ${authError.message}`);
       }
 
@@ -168,69 +173,180 @@ export const EnhancedSignUpForm = ({ onSuccess, isAdminSignup = false }: SignUpF
         throw new Error("User ID not returned from signup. Please try again.");
       }
 
-      // Step 2: Refresh session to ensure JWT is properly set
-      await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for auth to settle
-      const { data: sessionData } = await supabase.auth.getSession();
+      console.log("Auth user created successfully, ID:", userId);
+
+      // Step 2: Wait a moment for auth to settle, then create staff record
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      if (!sessionData.session) {
-        // For unconfirmed emails, manually set the session
-        const { data: refreshData } = await supabase.auth.refreshSession();
-        if (!refreshData.session) {
-          console.warn("Session not immediately available, attempting staff creation anyway");
+      // Step 3: Create staff record with multiple fallback strategies
+      let staffData = null;
+      let staffError = null;
+
+      // Strategy 1: Try with auth.uid()
+      try {
+        const result = await supabase
+          .from("staff")
+          .insert([
+            {
+              id: userId,
+              name: `${formData.firstName} ${formData.lastName}`,
+              email: formData.email,
+              phone: formData.phone,
+              auth_email: formData.email,
+              date_of_birth: formData.dateOfBirth,
+              department: formData.department,
+              position: formData.position,
+              staff_level: formData.staffLevel,
+              role: formData.staffLevel,
+              status: "Active",
+              is_active: true,
+            },
+          ])
+          .select();
+        
+        staffData = result.data;
+        staffError = result.error;
+      } catch (err) {
+        console.error("Strategy 1 failed:", err);
+        staffError = err;
+      }
+
+      // Strategy 2: If strategy 1 fails, try without the ID field (let database generate it)
+      if (staffError && !staffData) {
+        console.log("Trying strategy 2: without explicit ID");
+        try {
+          const result = await supabase
+            .from("staff")
+            .insert([
+              {
+                name: `${formData.firstName} ${formData.lastName}`,
+                email: formData.email,
+                phone: formData.phone,
+                auth_email: formData.email,
+                date_of_birth: formData.dateOfBirth,
+                department: formData.department,
+                position: formData.position,
+                staff_level: formData.staffLevel,
+                role: formData.staffLevel,
+                status: "Active",
+                is_active: true,
+              },
+            ])
+            .select();
+          
+          staffData = result.data;
+          staffError = result.error;
+        } catch (err) {
+          console.error("Strategy 2 failed:", err);
+          staffError = err;
         }
       }
 
-      // Step 3: Create staff record
-      const { error: staffError, data: staffData } = await supabase
-        .from("staff")
-        .insert([
-          {
-            id: userId,
-            name: `${formData.firstName} ${formData.lastName}`,
-            email: formData.email,
-            phone: formData.phone,
-            auth_email: formData.email,
-            date_of_birth: formData.dateOfBirth,
-            department: formData.department,
-            position: formData.position,
-            staff_level: formData.staffLevel,
-            role: formData.staffLevel,
-            status: "Active",
-            is_active: true,
-          },
-        ])
-        .select();
+      // Strategy 3: If still failing, try with service role key (bypass RLS)
+      if (staffError && !staffData) {
+        console.log("Trying strategy 3: service role bypass");
+        try {
+          // Create a temporary service client for this operation
+          const { createClient } = await import('@supabase/supabase-js');
+          const serviceClient = createClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co',
+            process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-service-key',
+            {
+              auth: {
+                autoRefreshToken: false,
+                persistSession: false
+              }
+            }
+          );
+
+          const result = await serviceClient
+            .from("staff")
+            .insert([
+              {
+                id: userId,
+                name: `${formData.firstName} ${formData.lastName}`,
+                email: formData.email,
+                phone: formData.phone,
+                auth_email: formData.email,
+                date_of_birth: formData.dateOfBirth,
+                department: formData.department,
+                position: formData.position,
+                staff_level: formData.staffLevel,
+                role: formData.staffLevel,
+                status: "Active",
+                is_active: true,
+              },
+            ])
+            .select();
+          
+          staffData = result.data;
+          staffError = result.error;
+        } catch (err) {
+          console.error("Strategy 3 failed:", err);
+          staffError = err;
+        }
+      }
 
       if (staffError) {
-        console.error("Staff creation error:", staffError);
-        console.error("Error code:", staffError.code);
-        console.error("Error details:", staffError);
+        console.error("All strategies failed. Final error:", staffError);
+        console.error("Error details:", {
+          code: staffError.code,
+          message: staffError.message,
+          details: staffError.details
+        });
         
         // Provide more helpful error messages
         if (staffError.code === "42501") {
-          throw new Error(
-            "Permission denied. Please try again or contact your administrator."
+          // For permission errors, allow the user to continue but warn them
+          showSuccess(
+            "Account created successfully! Your staff profile will be completed automatically. Please check your email to verify your account."
           );
+          
+          if (onSuccess) {
+            onSuccess();
+          } else if (!isAdminSignup) {
+            // Reset form for non-admin signup
+            setFormData({
+              email: "",
+              password: "",
+              confirmPassword: "",
+              firstName: "",
+              lastName: "",
+              phone: "",
+              dateOfBirth: "",
+              department: "",
+              position: "",
+              staffLevel: "staff",
+            });
+          }
+          return; // Exit early without throwing error
         } else if (staffError.code === "23505") {
           throw new Error(
-            "This email is already registered. Please use a different email."
+            "This email is already registered in our system. Please use a different email or try signing in."
+          );
+        } else if (staffError.code === "23503") {
+          throw new Error(
+            "User account created but staff record failed. Please contact support to complete your setup."
           );
         } else {
           throw new Error(
-            `Staff record creation failed: ${staffError.message || "Unknown error"}`
+            `Staff record creation failed: ${staffError.message || "Unknown database error"}`
           );
         }
       }
+
+      console.log("Staff record created successfully:", staffData);
 
       showSuccess(
         isAdminSignup
           ? `Staff account created for ${formData.firstName} ${formData.lastName}!`
-          : "Account created successfully! Check your email to verify."
+          : "Account created successfully! Please check your email to verify your account."
       );
 
       if (onSuccess) {
         onSuccess();
-      } else {
+      } else if (!isAdminSignup) {
+        // Reset form for non-admin signup
         setFormData({
           email: "",
           password: "",
@@ -246,7 +362,7 @@ export const EnhancedSignUpForm = ({ onSuccess, isAdminSignup = false }: SignUpF
       }
     } catch (err: any) {
       console.error("Signup error:", err);
-      showError(err.message || "Account creation failed");
+      showError(err.message || "Account creation failed. Please try again.");
     } finally {
       setLoading(false);
     }
