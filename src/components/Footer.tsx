@@ -1,6 +1,7 @@
 "use client";
 
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Facebook, Instagram, Twitter } from 'lucide-react';
 
 const Footer = () => {
@@ -30,11 +31,11 @@ const Footer = () => {
         <div>
           <h3 className="text-xl font-bold mb-6 text-blue-500">Quick Links</h3>
           <ul className="space-y-4 text-slate-400">
-            <li><a href="/" className="hover:text-white transition-colors">Home</a></li>
-            <li><a href="/rooms" className="hover:text-white transition-colors">Our Rooms</a></li>
-            <li><a href="/book" className="hover:text-white transition-colors">Book Now</a></li>
-            <li><a href="/careers" className="hover:text-white transition-colors">Careers</a></li>
-            <li><a href="/help" className="hover:text-white transition-colors">Help Center</a></li>
+            <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
+            <li><Link to="/rooms" className="hover:text-white transition-colors">Our Rooms</Link></li>
+            <li><Link to="/online-booking" className="hover:text-white transition-colors">Book Now</Link></li>
+            <li><Link to="/careers" className="hover:text-white transition-colors">Careers</Link></li>
+            <li><Link to="/help" className="hover:text-white transition-colors">Help Center</Link></li>
           </ul>
         </div>
 
