@@ -268,6 +268,27 @@ const Index = () => {
             <p className="text-slate-500 text-lg">Dedicated to world-class comfort in beddings, food, snacks and pool leisure for every Royal Springs guest.</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="border p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all">
+              <h3 className="text-2xl font-black text-slate-900 mb-3">Bedding Standards</h3>
+              <p className="text-slate-600 mb-4">Egyptian cotton linens, hypoallergenic pillows, and nightly turndown service for a royal sleep.</p>
+              <img src="/bed-2.JPG" alt="Luxury Bedding" className="rounded-2xl w-full h-48 object-cover" />
+            </div>
+            <div className="border p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all">
+              <h3 className="text-2xl font-black text-slate-900 mb-3">Gourmet Cuisine</h3>
+              <p className="text-slate-600 mb-4">24/7 chef-driven menus featuring seasonal Ugandan specialties and international favorites.</p>
+              <img src="/cahir$table-in-garden1.JPG" alt="Gourmet Food" className="rounded-2xl w-full h-48 object-cover" />
+            </div>
+            <div className="border p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all">
+              <h3 className="text-2xl font-black text-slate-900 mb-3">Perfect Leisure</h3>
+              <p className="text-slate-600 mb-4">Temperature-controlled pool and poolside cabanas set for a resort-grade experience.</p>
+              <img src="/waterfall2.JPG" alt="Swimming Pool" className="rounded-2xl w-full h-48 object-cover" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery Section */}
+      <section id="gallery" className="py-32 bg-slate-50">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-3xl mx-auto mb-20">
             <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tighter uppercase">Photo Gallery</h2>
