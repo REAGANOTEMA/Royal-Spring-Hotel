@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Label } from "@/components/ui/label";
 import { showSuccess, showError } from "@/utils/toast";
 import { cn } from "@/lib/utils";
-import { supabase, supabaseConfig } from "@/lib/supabase";
+import { supabase, auth, supabaseConfig } from "@/lib/supabase";
 import { EnhancedSignUpForm } from "@/components/EnhancedSignUpForm";
 
 const roles = [
@@ -26,6 +26,11 @@ const AuthPage = () => {
   const [role, setRole] = useState<string>("staff");
   const [loading, setLoading] = useState(false);
   const [isSignup, setIsSignup] = useState(false);
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
+  const [selectedRole, setSelectedRole] = useState("");
 
   const handleDemoLogin = () => {
     const normalizedDemoRole = role === 'gm' ? 'manager' : role;
@@ -42,34 +47,66 @@ const AuthPage = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      if (isSignup) {
+        // Sign up new user
+        const { data } = await auth.signUp(email, password, {
+          full_name: `${firstName} ${lastName}`,
+          staff_level: selectedRole,
+          department: selectedDepartment,
+        });
 
-      const userRoleRaw = data.user?.user_metadata?.staff_level || data.user?.user_metadata?.role || 'staff';
-      let userRole = userRoleRaw;
-      let userDepartment = '';
+        if (data.user) {
+          // Create staff record after successful signup
+          await supabase.from('staff').insert([{
+            id: data.user.id,
+            name: `${firstName} ${lastName}`,
+            email: email,
+            phone: phone,
+            auth_email: email,
+            department: selectedDepartment,
+            position: selectedRole === 'director' ? 'Director' : selectedRole === 'gm' ? 'General Manager' : selectedRole === 'hr' ? 'HR Manager' : 'Staff Member',
+            staff_level: selectedRole,
+            role: selectedRole,
+            status: 'Active',
+            is_active: true,
+          }]);
 
-      // read from staff table for stronger RBAC and department assignment
-      const { data: staffRecord } = await supabase
-        .from('staff')
-        .select('department, staff_level')
-        .or(`auth_email.eq.${email},email.eq.${email}`)
-        .single();
+          showSuccess(`Account created! Welcome to Royal Springs, ${firstName}!`);
+          navigate('/dashboard');
+        }
+      } else {
+        // Sign in existing user
+        const { data } = await auth.signIn(email, password);
 
-      if (staffRecord) {
-        userDepartment = staffRecord.department || '';
-        userRole = staffRecord.staff_level || userRole;
+        let userDepartment = '';
+        let userRole = selectedRole;
+
+        // Read from staff table for stronger RBAC and department assignment
+        try {
+          const { data: staffRecord } = await supabase
+            .from('staff')
+            .select('department, staff_level')
+            .or(`auth_email.eq.${email},email.eq.${email}`)
+            .single();
+
+          if (staffRecord) {
+            userDepartment = staffRecord.department || '';
+            userRole = staffRecord.staff_level || userRole;
+          }
+        } catch (err) {
+          console.warn("Could not fetch staff record:", err);
+        }
+
+        const userName = data.user?.user_metadata?.full_name || email.split('@')[0];
+
+        localStorage.setItem("userRole", userRole);
+        localStorage.setItem("userName", userName);
+        localStorage.setItem("userId", data.user.id);
+        localStorage.setItem("userDepartment", userDepartment || '');
+
+        showSuccess(`Welcome back, ${userName}!`);
+        navigate("/dashboard");
       }
-
-      const userName = data.user?.user_metadata?.full_name || email.split('@')[0];
-
-      localStorage.setItem("userRole", userRole);
-      localStorage.setItem("userName", userName);
-      localStorage.setItem("userId", data.user.id);
-      localStorage.setItem("userDepartment", userDepartment || '');
-
-      showSuccess(`Welcome back, ${userName}!`);
-      navigate("/dashboard");
     } catch (err: any) {
       console.error("Auth Error:", err);
       showError(err.message || "Authentication failed. Please try again.");

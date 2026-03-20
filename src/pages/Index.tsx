@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import Footer from '@/components/Footer';
 import AdvancedVoiceConcierge from '@/components/AdvancedVoiceConcierge';
 import PWAInstallPrompt from '@/components/PWAInstallPrompt';
+import ImageModal from '@/components/ImageModal';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +37,36 @@ const heroSlides = [
     url: '/hotel-house2.webp',
     title: 'Tropical Oasis',
     subtitle: 'Lush gardens and pristine landscapes creating a perfect escape from the everyday.',
+  },
+  {
+    url: '/bathroom-hero2.webp',
+    title: 'Spa Excellence',
+    subtitle: 'Indulge in our world-class spa facilities and rejuvenate your senses.',
+  },
+  {
+    url: '/bedHhero1.jpg',
+    title: 'Royal Comfort',
+    subtitle: 'Experience unparalleled comfort in our premium bedding and luxury suites.',
+  },
+  {
+    url: '/bedhero2.jpg',
+    title: 'Elegant Living',
+    subtitle: 'Sophisticated interiors and premium amenities for the discerning traveler.',
+  },
+  {
+    url: '/src/assets/apartment-hero.JPG',
+    title: 'Executive Apartments',
+    subtitle: 'Spacious living spaces with modern amenities for extended stays.',
+  },
+  {
+    url: '/src/assets/green-hero.JPG',
+    title: 'Green Paradise',
+    subtitle: 'Surrounded by lush tropical gardens and pristine natural beauty.',
+  },
+  {
+    url: '/src/assets/hero-hotel-view.JPG',
+    title: 'Resort Overview',
+    subtitle: 'A breathtaking panoramic view of our world-class resort facilities.',
   },
 ];
 
@@ -108,6 +139,8 @@ const testimonials = [
 const Index = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showInstallPrompt, setShowInstallPrompt] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -127,6 +160,29 @@ const Index = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [showInstallPrompt]);
+
+  // Handle modal navigation
+  const openModal = (index: number) => {
+    setSelectedImageIndex(index);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedImageIndex(null);
+  };
+
+  const goToPreviousImage = () => {
+    if (selectedImageIndex !== null && selectedImageIndex > 0) {
+      setSelectedImageIndex(selectedImageIndex - 1);
+    }
+  };
+
+  const goToNextImage = () => {
+    if (selectedImageIndex !== null && selectedImageIndex < galleryImages.length - 1) {
+      setSelectedImageIndex(selectedImageIndex + 1);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -251,22 +307,23 @@ const Index = () => {
             <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tighter uppercase">Photo Gallery</h2>
             <p className="text-slate-500 text-lg font-medium">Explore the beauty and elegance of Royal Springs Resort through our curated collection.</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
             {galleryImages.map((image, index) => (
               <motion.div
                 key={index}
-                whileHover={{ scale: 1.05 }}
-                className="group relative h-80 rounded-[2rem] overflow-hidden shadow-xl cursor-pointer"
+                whileHover={{ scale: 1.02 }}
+                onClick={() => openModal(index)}
+                className="group relative h-72 rounded-xl overflow-hidden shadow-lg cursor-pointer"
               >
                 <img
                   src={image.src}
                   alt={image.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
-                  <div className="space-y-2">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-4">
+                  <div className="space-y-1">
                     <p className="text-xs font-black text-blue-400 uppercase tracking-widest">{image.category}</p>
-                    <h3 className="text-2xl font-black text-white">{image.title}</h3>
+                    <h3 className="text-lg font-black text-white">{image.title}</h3>
                   </div>
                 </div>
               </motion.div>
@@ -510,6 +567,19 @@ const Index = () => {
       <AdvancedVoiceConcierge context="guest" />
       {showInstallPrompt && (
         <PWAInstallPrompt onClose={() => setShowInstallPrompt(false)} />
+      )}
+      
+      {/* Image Modal */}
+      {isModalOpen && selectedImageIndex !== null && (
+        <ImageModal
+          image={galleryImages[selectedImageIndex]}
+          isOpen={isModalOpen}
+          onClose={closeModal}
+          onPrevious={goToPreviousImage}
+          onNext={goToNextImage}
+          currentIndex={selectedImageIndex}
+          totalImages={galleryImages.length}
+        />
       )}
     </div>
   );

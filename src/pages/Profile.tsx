@@ -15,7 +15,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { showSuccess, showError, showLoading, dismissToast } from "@/utils/toast";
-import { supabase } from "@/lib/supabase";
+import { supabase, auth, db } from "@/lib/supabase";
 
 const Profile: React.FC = () => {
   const [staff, setStaff] = useState<any>(null);
@@ -34,42 +34,48 @@ const Profile: React.FC = () => {
 
   const fetchProfile = async () => {
     const name = localStorage.getItem("userName") || "Staff Member";
-    const { data: staffData } = await supabase.from('staff').select('*').eq('name', name).single();
-    
-    if (staffData) {
-      setStaff(staffData);
-      setFormData(staffData);
+    try {
+      const staffData = await db.fetch('staff', {
+        where: `name.eq.${name}`,
+        single: true
+      });
       
-      const { data: attendData } = await supabase
-        .from('check_in_logs')
-        .select('*')
-        .eq('staff_id', staffData.id)
-        .order('check_in', { ascending: false });
-      setAttendance(attendData || []);
+      if (staffData && staffData.length > 0) {
+        setStaff(staffData[0]);
+        setFormData(staffData[0]);
+        
+        const attendData = await db.fetch('check_in_logs', {
+          where: `staff_id.eq.${staffData[0].id}`,
+          orderBy: { column: 'check_in', ascending: false }
+        });
+        setAttendance(attendData || []);
 
-      const { data: recognitionData } = await supabase
-        .from('employee_recognition')
-        .select('*')
-        .eq('staff_id', staffData.id)
-        .eq('recognition_type', 'employee_of_month')
-        .order('effective_date', { ascending: false })
-        .limit(1);
-      setRecognition(recognitionData?.[0] || null);
-      
-      // Check if currently checked in
-      if (attendData && attendData.length > 0) {
-        const latestLog = attendData[0];
-        if (!latestLog.check_out) {
-          setIsCheckedIn(true);
-          // Calculate current hours
-          const checkInTime = new Date(latestLog.check_in).getTime();
-          const now = new Date().getTime();
-          const hours = (now - checkInTime) / (1000 * 60 * 60);
-          setCurrentHours(Math.round(hours * 100) / 100);
-        } else {
-          setIsCheckedIn(false);
+        const { data: recognitionData } = await supabase
+          .from('employee_recognition')
+          .select('*')
+          .eq('staff_id', staffData[0].id)
+          .eq('recognition_type', 'employee_of_month')
+          .order('effective_date', { ascending: false })
+          .limit(1);
+        setRecognition(recognitionData?.[0] || null);
+        
+        // Check if currently checked in
+        if (attendData && attendData.length > 0) {
+          const latestLog = attendData[0];
+          if (!latestLog.check_out) {
+            setIsCheckedIn(true);
+            // Calculate current hours
+            const checkInTime = new Date(latestLog.check_in).getTime();
+            const now = new Date().getTime();
+            const hours = (now - checkInTime) / (1000 * 60 * 60);
+            setCurrentHours(Math.round(hours * 100) / 100);
+          } else {
+            setIsCheckedIn(false);
+          }
         }
       }
+    } catch (error) {
+      console.error("Failed to fetch profile:", error);
     }
   };
 
@@ -272,18 +278,24 @@ const Profile: React.FC = () => {
       } else {
         // Check in
         const checkInTime = new Date();
-        const { data, error } = await supabase
-          .from('check_in_logs')
-          .insert({
-            staff_id: staff.id,
-            staff_name: staff.name,
-            check_in: checkInTime.toISOString(),
-            check_out: null,
-            total_hours: 0
-          })
-          .select();
+        const attendData = await db.fetch('check_in_logs', {
+          where: `staff_id.eq.${staff.id}`,
+          orderBy: { column: 'check_in', ascending: false }
+        });
 
-        if (error) throw error;
+        if (attendData.length > 0 && !attendData[0].check_out) {
+          throw new Error("You are already checked in.");
+        }
+
+        const result = await db.insert('check_in_logs', [{
+          staff_id: staff.id,
+          staff_name: staff.name,
+          check_in: checkInTime.toISOString(),
+          check_out: null,
+          total_hours: 0
+        }]);
+
+        if (result.error) throw result.error;
 
         setIsCheckedIn(true);
         setCurrentHours(0);

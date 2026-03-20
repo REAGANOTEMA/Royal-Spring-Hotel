@@ -23,7 +23,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { supabase } from "@/lib/supabase";
+import { supabase, auth, db, supabaseConfig } from "@/lib/supabase";
 import { Link } from "react-router-dom";
 import { cn } from "@/lib/utils";
 

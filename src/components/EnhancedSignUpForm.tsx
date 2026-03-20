@@ -14,7 +14,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { User, Mail, Phone, Calendar, MapPin, Building2, Briefcase, Lock, AlertCircle } from "lucide-react";
 import { showSuccess, showError } from "@/utils/toast";
-import { supabase } from "@/lib/supabase";
+import { supabase, auth, db, StaffRecord } from '@/lib/supabase';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SignUpFormProps {
@@ -147,18 +147,16 @@ export const EnhancedSignUpForm = ({ onSuccess, isAdminSignup = false }: SignUpF
       console.log("Starting signup process for:", formData.email);
       
       // Step 1: Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
-            staff_level: formData.staffLevel,
-            department: formData.department,
-          },
-        },
-      });
+      const { data: authData, error: authError } = await auth.signUp(
+        formData.email,
+        formData.password,
+        {
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          staff_level: formData.staffLevel,
+          department: formData.department,
+        }
+      );
 
       if (authError) {
         console.error("Auth signup error:", authError);
@@ -184,28 +182,23 @@ export const EnhancedSignUpForm = ({ onSuccess, isAdminSignup = false }: SignUpF
 
       // Strategy 1: Try with auth.uid()
       try {
-        const result = await supabase
-          .from("staff")
-          .insert([
-            {
-              id: userId,
-              name: `${formData.firstName} ${formData.lastName}`,
-              email: formData.email,
-              phone: formData.phone,
-              auth_email: formData.email,
-              date_of_birth: formData.dateOfBirth,
-              department: formData.department,
-              position: formData.position,
-              staff_level: formData.staffLevel,
-              role: formData.staffLevel,
-              status: "Active",
-              is_active: true,
-            },
-          ])
-          .select();
+        const result = await db.insert("staff", [{
+          id: userId,
+          name: `${formData.firstName} ${formData.lastName}`,
+          email: formData.email,
+          phone: formData.phone,
+          auth_email: formData.email,
+          date_of_birth: formData.dateOfBirth,
+          department: formData.department,
+          position: formData.position,
+          staff_level: formData.staffLevel,
+          role: formData.staffLevel,
+          status: "Active",
+          is_active: true,
+        }]);
         
-        staffData = result.data;
-        staffError = result.error;
+        staffData = result;
+        staffError = null;
       } catch (err) {
         console.error("Strategy 1 failed:", err);
         staffError = err;
@@ -215,27 +208,22 @@ export const EnhancedSignUpForm = ({ onSuccess, isAdminSignup = false }: SignUpF
       if (staffError && !staffData) {
         console.log("Trying strategy 2: without explicit ID");
         try {
-          const result = await supabase
-            .from("staff")
-            .insert([
-              {
-                name: `${formData.firstName} ${formData.lastName}`,
-                email: formData.email,
-                phone: formData.phone,
-                auth_email: formData.email,
-                date_of_birth: formData.dateOfBirth,
-                department: formData.department,
-                position: formData.position,
-                staff_level: formData.staffLevel,
-                role: formData.staffLevel,
-                status: "Active",
-                is_active: true,
-              },
-            ])
-            .select();
+          const result = await db.insert("staff", [{
+            name: `${formData.firstName} ${formData.lastName}`,
+            email: formData.email,
+            phone: formData.phone,
+            auth_email: formData.email,
+            date_of_birth: formData.dateOfBirth,
+            department: formData.department,
+            position: formData.position,
+            staff_level: formData.staffLevel,
+            role: formData.staffLevel,
+            status: "Active",
+            is_active: true,
+          }]);
           
-          staffData = result.data;
-          staffError = result.error;
+          staffData = result;
+          staffError = null;
         } catch (err) {
           console.error("Strategy 2 failed:", err);
           staffError = err;
@@ -246,20 +234,7 @@ export const EnhancedSignUpForm = ({ onSuccess, isAdminSignup = false }: SignUpF
       if (staffError && !staffData) {
         console.log("Trying strategy 3: service role bypass");
         try {
-          // Create a temporary service client for this operation
-          const { createClient } = await import('@supabase/supabase-js');
-          const serviceClient = createClient(
-            process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://your-project.supabase.co',
-            process.env.SUPABASE_SERVICE_ROLE_KEY || 'your-service-key',
-            {
-              auth: {
-                autoRefreshToken: false,
-                persistSession: false
-              }
-            }
-          );
-
-          const result = await serviceClient
+          const result = await supabaseAdmin
             .from("staff")
             .insert([
               {

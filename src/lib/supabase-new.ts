@@ -1,4 +1,7 @@
-"use client";
+/**
+ * Supabase Configuration and Utilities
+ * Complete setup for Royal Springs Resort
+ */
 
 import { createClient, SupabaseClient, Session, User } from '@supabase/supabase-js';
 
@@ -59,7 +62,6 @@ export const supabaseConfig = {
   isConfigured,
   hasServiceKey: Boolean(supabaseServiceKey)
 };
-
 
 // Type definitions for better TypeScript support
 export interface DatabaseUser {
@@ -333,6 +335,24 @@ export const db = {
       console.error(`Unexpected database error (${table}):`, err);
       throw new Error(`Failed to delete ${table}. Please try again.`);
     }
+  },
+
+  // Real-time subscription
+  subscribe: <T>(table: string, callback: (payload: T) => void) => {
+    try {
+      return supabase
+        .channel(`public:${table}`)
+        .on('postgres_changes', (event) => {
+          if (event.eventType === 'INSERT' || event.eventType === 'UPDATE' || event.eventType === 'DELETE') {
+            callback(event.new as T);
+          }
+        })
+        .subscribe();
+    } catch (err) {
+      console.error(`Subscription error (${table}):`, err);
+      // Return empty subscription
+      return { data: [], unsubscribe: () => {} };
+    }
   }
 };
 
@@ -371,3 +391,5 @@ export const utils = {
     }).format(amount);
   }
 };
+
+export default supabase;
