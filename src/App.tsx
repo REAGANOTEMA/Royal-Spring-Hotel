@@ -96,7 +96,7 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
     getSession();
 
     // Listen for auth changes
-    const subscription = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       if (session) {
         const role = session.user.user_metadata?.role || 'staff';
@@ -109,7 +109,7 @@ const PrivateRoute = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
-    return () => subscription?.subscription?.unsubscribe();
+    return () => subscription.unsubscribe();
   }, []);
 
   if (loading) {

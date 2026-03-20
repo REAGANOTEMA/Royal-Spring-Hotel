@@ -199,6 +199,26 @@ export const getAllowedPages = (userRole: StaffLevel): string[] => {
       '/guests',
       '/messages',
     ],
+    hr: [
+      ...basePages,
+      '/hr',
+      '/payroll',
+      '/staff',
+      '/messages',
+    ],
+    accountant: [
+      ...basePages,
+      '/billing',
+      '/payroll',
+      '/finance',
+      '/accountant',
+      '/messages',
+    ],
+    chef: [
+      ...basePages,
+      '/kitchen',
+      '/messages',
+    ],
   };
   
   return rolePages[userRole] || basePages;
@@ -297,6 +317,24 @@ export const getSidebarMenuItems = (userRole: StaffLevel) => {
       { href: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
       { href: '/guests', label: 'Guests', icon: 'Users' },
       { href: '/messages', label: 'Messages', icon: 'MessageSquare' },
+      { href: '/profile', label: 'My Profile', icon: 'User' },
+    ],
+    hr: [
+      { href: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
+      { href: '/hr', label: 'HR & Staff', icon: 'Users' },
+      { href: '/payroll', label: 'Payroll', icon: 'DollarSign' },
+      { href: '/profile', label: 'My Profile', icon: 'User' },
+    ],
+    accountant: [
+      { href: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
+      { href: '/billing', label: 'Billing', icon: 'ReceiptText' },
+      { href: '/payroll', label: 'Payroll', icon: 'DollarSign' },
+      { href: '/finance', label: 'Finance', icon: 'BarChart3' },
+      { href: '/profile', label: 'My Profile', icon: 'User' },
+    ],
+    chef: [
+      { href: '/dashboard', label: 'Dashboard', icon: 'LayoutDashboard' },
+      { href: '/kitchen', label: 'Kitchen', icon: 'UtensilsCrossed' },
       { href: '/profile', label: 'My Profile', icon: 'User' },
     ],
   };

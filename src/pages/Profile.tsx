@@ -321,11 +321,11 @@ const Profile: React.FC = () => {
 
         {recognition && (
           <div className="p-6 max-w-6xl mx-auto">
-            <Alert variant="success" className="rounded-2xl">
+            <Alert variant="default" className="rounded-2xl border-emerald-200 bg-emerald-50">
               <div className="flex flex-col gap-2">
-                <p className="font-black text-sm">Congratulations!</p>
-                <p className="text-sm">You are recognized as <strong>Employee of the Month</strong> for {new Date(recognition.effective_date).toLocaleDateString()}.</p>
-                <p className="text-xs text-slate-600">{recognition.notes}</p>
+                <p className="font-black text-sm text-emerald-800">Congratulations!</p>
+                <p className="text-sm text-emerald-700">You are recognized as <strong>Employee of the Month</strong> for {new Date(recognition.effective_date).toLocaleDateString()}.</p>
+                <p className="text-xs text-emerald-600">{recognition.notes}</p>
               </div>
             </Alert>
           </div>

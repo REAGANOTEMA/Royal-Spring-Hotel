@@ -3,6 +3,7 @@
 export interface Booking {
   id: string;
   guest: string;
+  email?: string; // Added to fix TS errors
   room: string;
   status: string;
   amount: string;
