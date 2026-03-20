@@ -31,7 +31,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "lucide-react";
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { showSuccess, showError } from "@/utils/toast";
 import { cn } from "@/lib/utils";
@@ -280,35 +280,35 @@ const Bookings: React.FC = () => {
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50/50">
-                    <tr>
-                      <th className="px-8 py-4 text-left font-bold">Guest Name</th>
-                      <th className="py-4 text-left font-bold">Room</th>
-                      <th className="py-4 text-left font-bold">Check-In</th>
-                      <th className="py-4 text-left font-bold">Check-Out</th>
-                      <th className="py-4 text-left font-bold">Status</th>
-                      <th className="text-right px-8 py-4 font-bold">Amount</th>
-                      <th className="text-right px-8 py-4 font-bold">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
+                <Table>
+                  <TableHeader className="bg-slate-50/50">
+                    <TableRow>
+                      <TableHead className="px-8 font-bold">Guest Name</TableHead>
+                      <TableHead className="font-bold">Room</TableHead>
+                      <TableHead className="font-bold">Check-In</TableHead>
+                      <TableHead className="font-bold">Check-Out</TableHead>
+                      <TableHead className="font-bold">Status</TableHead>
+                      <TableHead className="text-right px-8 font-bold">Amount</TableHead>
+                      <TableHead className="text-right px-8 font-bold">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
                     {filteredBookings.length > 0 ? filteredBookings.map((booking) => (
-                      <tr key={booking.id} className="hover:bg-slate-50/50 transition-colors border-b">
-                        <td className="px-8 py-4 font-semibold">
+                      <TableRow key={booking.id} className="hover:bg-slate-50/50 transition-colors">
+                        <TableCell className="px-8 font-semibold">
                           <div>
                             <p className="font-black text-slate-900">{booking.guest}</p>
                             <p className="text-xs text-slate-500">{booking.email}</p>
                           </div>
-                        </td>
-                        <td className="py-4 font-bold text-blue-600">Room {booking.room}</td>
-                        <td className="py-4 text-sm">
+                        </TableCell>
+                        <TableCell className="font-bold text-blue-600">Room {booking.room}</TableCell>
+                        <TableCell className="text-sm">
                           {booking.check_in ? new Date(booking.check_in).toLocaleDateString() : "N/A"}
-                        </td>
-                        <td className="py-4 text-sm">
+                        </TableCell>
+                        <TableCell className="text-sm">
                           {booking.check_out ? new Date(booking.check_out).toLocaleDateString() : "N/A"}
-                        </td>
-                        <td className="py-4">
+                        </TableCell>
+                        <TableCell>
                           <Badge className={cn(
                             "px-2 py-0.5 font-black rounded-lg text-white",
                             booking.status === "Confirmed" ? "bg-blue-600" :
@@ -318,9 +318,9 @@ const Bookings: React.FC = () => {
                           )}>
                             {booking.status}
                           </Badge>
-                        </td>
-                        <td className="text-right px-8 py-4 font-black text-purple-600">{booking.amount}</td>
-                        <td className="text-right px-8 py-4">
+                        </TableCell>
+                        <TableCell className="text-right px-8 font-black text-purple-600">{booking.amount}</TableCell>
+                        <TableCell className="text-right px-8">
                           <div className="flex justify-end gap-2">
                             {booking.status === "Confirmed" && (
                               <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-black rounded-lg" onClick={() => handleStatusUpdate(booking.id, booking.room, "Checked In")}>
@@ -339,17 +339,17 @@ const Bookings: React.FC = () => {
                               <Trash2 size={16} />
                             </Button>
                           </div>
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     )) : (
-                      <tr>
-                        <td colSpan={7} className="text-center py-8 text-slate-500 font-medium">
+                      <TableRow>
+                        <TableCell colSpan={7} className="text-center py-8 text-slate-500 font-medium">
                           No bookings found matching your criteria
-                        </td>
-                      </tr>
+                        </TableCell>
+                      </TableRow>
                     )}
-                  </tbody>
-                </table>
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>
