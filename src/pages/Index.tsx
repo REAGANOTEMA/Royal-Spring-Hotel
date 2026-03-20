@@ -26,9 +26,20 @@ const heroSlides = [
     title: 'Natural Serenity',
     subtitle: 'Relax by our crystal-clear springs and immerse yourself in the tranquility of nature.',
   },
+  {
+    url: '/hotel-house1.webp',
+    title: 'Evening Paradise',
+    subtitle: 'Witness breathtaking sunsets and magical evening ambiance at our tropical paradise.',
+  },
+  {
+    url: '/hotel-house2.webp',
+    title: 'Tropical Oasis',
+    subtitle: 'Lush gardens and pristine landscapes creating a perfect escape from the everyday.',
+  },
 ];
 
 const galleryImages = [
+  // Public folder images
   { src: '/hotel-house.webp', title: 'Main Resort Wing', category: 'Architecture' },
   { src: '/bed-hero.jpg', title: 'Royal Master Suite', category: 'Rooms' },
   { src: '/hotel-house1.webp', title: 'Evening Ambiance', category: 'Resort' },
@@ -41,6 +52,35 @@ const galleryImages = [
   { src: '/hotel-house5.webp', title: 'Fine Dining Area', category: 'Dining' },
   { src: '/water-spring.webp', title: 'The Water Spring', category: 'Amenities' },
   { src: '/hotel-house8.webp', title: 'Sunset Views', category: 'Resort' },
+  { src: '/bed3.jpg', title: 'Executive Suite', category: 'Rooms' },
+  { src: '/bed4.jpg', title: 'Presidential Suite', category: 'Rooms' },
+  { src: '/hotel-house6.webp', title: 'Garden Terrace', category: 'Nature' },
+  { src: '/bathroom1.webp', title: 'Luxury Bathroom', category: 'Luxury' },
+  { src: '/bed.jpg', title: 'Comfort Suite', category: 'Rooms' },
+  
+  // Assets folder images
+  { src: '/src/assets/apartment-hero.JPG', title: 'Apartment Living', category: 'Suites' },
+  { src: '/src/assets/apartment-view.JPG', title: 'Apartment View', category: 'Suites' },
+  { src: '/src/assets/bed-1.JPG', title: 'Royal Bed Suite', category: 'Rooms' },
+  { src: '/src/assets/bed-2.JPG', title: 'Executive Bedroom', category: 'Rooms' },
+  { src: '/src/assets/bed-4.JPG', title: 'Presidential Bedroom', category: 'Rooms' },
+  { src: '/src/assets/bed-5.JPG', title: 'Deluxe Bedroom', category: 'Rooms' },
+  { src: '/src/assets/cahir$table-in-garden1.JPG', title: 'Garden Dining', category: 'Dining' },
+  { src: '/src/assets/conference-room1.JPG', title: 'Conference Facilities', category: 'Business' },
+  { src: '/src/assets/free-garden.JPG', title: 'Free Garden Space', category: 'Nature' },
+  { src: '/src/assets/garden-greens.JPG', title: 'Lush Garden Greens', category: 'Nature' },
+  { src: '/src/assets/garden-view.JPG', title: 'Scenic Garden View', category: 'Nature' },
+  { src: '/src/assets/garden1.JPG', title: 'Tropical Garden', category: 'Nature' },
+  { src: '/src/assets/green-hero.JPG', title: 'Green Paradise', category: 'Nature' },
+  { src: '/src/assets/hero-hotel-view.JPG', title: 'Resort Overview', category: 'Architecture' },
+  { src: '/src/assets/hotel-road.JPG', title: 'Resort Access Road', category: 'Architecture' },
+  { src: '/src/assets/hotel-view.JPG', title: 'Panoramic Hotel View', category: 'Architecture' },
+  { src: '/src/assets/road-post.JPG', title: 'Scenic Road Post', category: 'Nature' },
+  { src: '/src/assets/road-to-apartment.JPG', title: 'Apartment Access', category: 'Architecture' },
+  { src: '/src/assets/road-view.JPG', title: 'Mountain Road View', category: 'Nature' },
+  { src: '/src/assets/waterfall1.JPG', title: 'Waterfall Paradise', category: 'Nature' },
+  { src: '/src/assets/waterfall2.JPG', title: 'Crystal Waterfall', category: 'Nature' },
+  { src: '/src/assets/waterfall3.JPG', title: 'Serene Waterfall', category: 'Nature' },
 ];
 
 const testimonials = [
@@ -174,17 +214,17 @@ const Index = () => {
             <div className="border p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all">
               <h3 className="text-2xl font-black text-slate-900 mb-3">Bedding Standards</h3>
               <p className="text-slate-600 mb-4">Egyptian cotton linens, hypoallergenic pillows, and nightly turndown service for a royal sleep.</p>
-              <img src="/bed.jpg" alt="Luxury Bedding" className="rounded-2xl w-full h-48 object-cover" />
+              <img src="/src/assets/bed-2.JPG" alt="Luxury Bedding" className="rounded-2xl w-full h-48 object-cover" />
             </div>
             <div className="border p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all">
               <h3 className="text-2xl font-black text-slate-900 mb-3">Gourmet Cuisine</h3>
               <p className="text-slate-600 mb-4">24/7 chef-driven menus featuring seasonal Ugandan specialties and international favorites.</p>
-              <img src="/hotel-house5.webp" alt="Gourmet Food" className="rounded-2xl w-full h-48 object-cover" />
+              <img src="/src/assets/cahir$table-in-garden1.JPG" alt="Gourmet Food" className="rounded-2xl w-full h-48 object-cover" />
             </div>
             <div className="border p-8 rounded-3xl shadow-lg hover:shadow-2xl transition-all">
               <h3 className="text-2xl font-black text-slate-900 mb-3">Perfect Leisure</h3>
               <p className="text-slate-600 mb-4">Temperature-controlled pool and poolside cabanas set for a resort-grade experience.</p>
-              <img src="/water-spring.webp" alt="Swimming Pool" className="rounded-2xl w-full h-48 object-cover" />
+              <img src="/src/assets/waterfall2.JPG" alt="Swimming Pool" className="rounded-2xl w-full h-48 object-cover" />
             </div>
           </div>
         </div>
@@ -217,6 +257,161 @@ const Index = () => {
                 </div>
               </motion.div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Rooms Showcase Section */}
+      <section className="py-32 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tighter uppercase">Luxury Rooms & Suites</h2>
+            <p className="text-slate-500 text-lg font-medium">Experience unparalleled comfort in our meticulously designed accommodations.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="group relative h-96 rounded-[2rem] overflow-hidden shadow-xl">
+              <img src="/bed-hero.jpg" alt="Royal Master Suite" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-blue-400 uppercase tracking-widest">Master Suite</p>
+                  <h3 className="text-2xl font-black text-white">Royal Excellence</h3>
+                </div>
+              </div>
+            </div>
+            <div className="group relative h-96 rounded-[2rem] overflow-hidden shadow-xl">
+              <img src="/src/assets/bed-1.JPG" alt="Royal Bed Suite" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-blue-400 uppercase tracking-widest">Deluxe</p>
+                  <h3 className="text-2xl font-black text-white">Premium Comfort</h3>
+                </div>
+              </div>
+            </div>
+            <div className="group relative h-96 rounded-[2rem] overflow-hidden shadow-xl">
+              <img src="/src/assets/bed-4.JPG" alt="Presidential Bedroom" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-blue-400 uppercase tracking-widest">Presidential</p>
+                  <h3 className="text-2xl font-black text-white">Ultimate Luxury</h3>
+                </div>
+              </div>
+            </div>
+            <div className="group relative h-96 rounded-[2rem] overflow-hidden shadow-xl">
+              <img src="/src/assets/apartment-hero.JPG" alt="Apartment Living" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-blue-400 uppercase tracking-widest">Apartment</p>
+                  <h3 className="text-2xl font-black text-white">Extended Stay</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gardens & Nature Section */}
+      <section className="py-32 bg-slate-50">
+        <div className="container mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tighter uppercase">Tropical Gardens</h2>
+            <p className="text-slate-500 text-lg font-medium">Immerse yourself in the breathtaking natural beauty of our curated landscapes.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="group relative h-80 rounded-[2rem] overflow-hidden shadow-xl">
+              <img src="/src/assets/garden-greens.JPG" alt="Lush Garden Greens" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">Nature</p>
+                  <h3 className="text-2xl font-black text-white">Lush Greens</h3>
+                </div>
+              </div>
+            </div>
+            <div className="group relative h-80 rounded-[2rem] overflow-hidden shadow-xl">
+              <img src="/src/assets/free-garden.JPG" alt="Free Garden Space" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">Recreation</p>
+                  <h3 className="text-2xl font-black text-white">Open Spaces</h3>
+                </div>
+              </div>
+            </div>
+            <div className="group relative h-80 rounded-[2rem] overflow-hidden shadow-xl">
+              <img src="/src/assets/green-hero.JPG" alt="Green Paradise" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">Paradise</p>
+                  <h3 className="text-2xl font-black text-white">Green Haven</h3>
+                </div>
+              </div>
+            </div>
+            <div className="group relative h-80 rounded-[2rem] overflow-hidden shadow-xl">
+              <img src="/src/assets/garden-view.JPG" alt="Scenic Garden View" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">Scenic</p>
+                  <h3 className="text-2xl font-black text-white">Garden Views</h3>
+                </div>
+              </div>
+            </div>
+            <div className="group relative h-80 rounded-[2rem] overflow-hidden shadow-xl">
+              <img src="/src/assets/garden1.JPG" alt="Tropical Garden" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">Tropical</p>
+                  <h3 className="text-2xl font-black text-white">Exotic Flora</h3>
+                </div>
+              </div>
+            </div>
+            <div className="group relative h-80 rounded-[2rem] overflow-hidden shadow-xl">
+              <img src="/src/assets/cahir$table-in-garden1.JPG" alt="Garden Dining" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-emerald-400 uppercase tracking-widest">Dining</p>
+                  <h3 className="text-2xl font-black text-white">Al Fresco</h3>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Waterfalls Section */}
+      <section className="py-32 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tighter uppercase">Natural Waterfalls</h2>
+            <p className="text-slate-500 text-lg font-medium">Discover the mesmerizing waterfalls that surround our resort paradise.</p>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="group relative h-96 rounded-[2rem] overflow-hidden shadow-xl lg:col-span-2">
+              <img src="/src/assets/waterfall1.JPG" alt="Waterfall Paradise" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                <div className="space-y-2">
+                  <p className="text-xs font-black text-cyan-400 uppercase tracking-widest">Main Attraction</p>
+                  <h3 className="text-3xl font-black text-white">Paradise Falls</h3>
+                </div>
+              </div>
+            </div>
+            <div className="space-y-8">
+              <div className="group relative h-44 rounded-[2rem] overflow-hidden shadow-xl">
+                <img src="/src/assets/waterfall2.JPG" alt="Crystal Waterfall" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-6">
+                  <div className="space-y-2">
+                    <p className="text-xs font-black text-cyan-400 uppercase tracking-widest">Crystal</p>
+                    <h3 className="text-xl font-black text-white">Pure Waters</h3>
+                  </div>
+                </div>
+              </div>
+              <div className="group relative h-44 rounded-[2rem] overflow-hidden shadow-xl">
+                <img src="/src/assets/waterfall3.JPG" alt="Serene Waterfall" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-6">
+                  <div className="space-y-2">
+                    <p className="text-xs font-black text-cyan-400 uppercase tracking-widest">Serene</p>
+                    <h3 className="text-xl font-black text-white">Peaceful Falls</h3>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
