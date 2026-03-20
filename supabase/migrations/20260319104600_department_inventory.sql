@@ -17,6 +17,9 @@ CREATE TABLE IF NOT EXISTS rooms_inventory (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE rooms_inventory
+    ADD COLUMN IF NOT EXISTS department TEXT DEFAULT 'Rooms Division';
+
 CREATE INDEX IF NOT EXISTS idx_rooms_inventory_dept ON rooms_inventory(department);
 
 -- ==========================================
@@ -26,12 +29,19 @@ CREATE INDEX IF NOT EXISTS idx_rooms_inventory_dept ON rooms_inventory(departmen
 CREATE TABLE IF NOT EXISTS kitchen_inventory (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     item_name TEXT NOT NULL,
-    stock_quantity INT NOT NULL DEFAULT 0,
+    quantity INT NOT NULL DEFAULT 0,
     unit TEXT NOT NULL,
     department TEXT DEFAULT 'Food & Beverage',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE kitchen_inventory
+    ADD COLUMN IF NOT EXISTS department TEXT DEFAULT 'Food & Beverage';
+
+-- Migrate old stock_quantity column if it exists
+ALTER TABLE kitchen_inventory
+    RENAME COLUMN stock_quantity TO quantity;
 
 CREATE INDEX IF NOT EXISTS idx_kitchen_inventory_dept ON kitchen_inventory(department);
 
@@ -42,13 +52,20 @@ CREATE INDEX IF NOT EXISTS idx_kitchen_inventory_dept ON kitchen_inventory(depar
 CREATE TABLE IF NOT EXISTS engineering_inventory (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     item_name TEXT NOT NULL,
-    stock_quantity INT NOT NULL DEFAULT 0,
+    quantity INT NOT NULL DEFAULT 0,
     unit TEXT NOT NULL,
     category TEXT,
     department TEXT DEFAULT 'Engineering',
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE engineering_inventory
+    ADD COLUMN IF NOT EXISTS department TEXT DEFAULT 'Engineering';
+
+-- Migrate old stock_quantity column if it exists
+ALTER TABLE engineering_inventory
+    RENAME COLUMN stock_quantity TO quantity;
 
 CREATE INDEX IF NOT EXISTS idx_engineering_inventory_dept ON engineering_inventory(department);
 
@@ -67,6 +84,9 @@ CREATE TABLE IF NOT EXISTS housekeeping_supplies (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE housekeeping_supplies
+    ADD COLUMN IF NOT EXISTS department TEXT DEFAULT 'Housekeeping';
+
 CREATE INDEX IF NOT EXISTS idx_housekeeping_supplies_dept ON housekeeping_supplies(department);
 
 -- ==========================================
@@ -84,6 +104,9 @@ CREATE TABLE IF NOT EXISTS security_supplies (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE security_supplies
+    ADD COLUMN IF NOT EXISTS department TEXT DEFAULT 'Security';
+
 CREATE INDEX IF NOT EXISTS idx_security_supplies_dept ON security_supplies(department);
 
 -- ==========================================
@@ -100,6 +123,9 @@ CREATE TABLE IF NOT EXISTS it_supplies (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE it_supplies
+    ADD COLUMN IF NOT EXISTS department TEXT DEFAULT 'Information Technology';
 
 CREATE INDEX IF NOT EXISTS idx_it_supplies_dept ON it_supplies(department);
 
@@ -120,6 +146,9 @@ CREATE TABLE IF NOT EXISTS department_activity_logs (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE department_activity_logs
+    ADD COLUMN IF NOT EXISTS department TEXT;
+
 CREATE INDEX IF NOT EXISTS idx_dept_activity_logs_staff ON department_activity_logs(staff_id);
 CREATE INDEX IF NOT EXISTS idx_dept_activity_logs_dept ON department_activity_logs(department);
 CREATE INDEX IF NOT EXISTS idx_dept_activity_logs_created ON department_activity_logs(created_at);
@@ -138,6 +167,7 @@ ALTER TABLE it_supplies ENABLE ROW LEVEL SECURITY;
 ALTER TABLE department_activity_logs ENABLE ROW LEVEL SECURITY;
 
 -- Rooms Division inventory access
+DROP POLICY IF EXISTS "rooms_inventory_view" ON rooms_inventory;
 CREATE POLICY "rooms_inventory_view"
 ON rooms_inventory FOR SELECT
 TO authenticated
@@ -147,6 +177,7 @@ USING (
 );
 
 -- Kitchen inventory access
+DROP POLICY IF EXISTS "kitchen_inventory_view" ON kitchen_inventory;
 CREATE POLICY "kitchen_inventory_view"
 ON kitchen_inventory FOR SELECT
 TO authenticated
@@ -156,6 +187,7 @@ USING (
 );
 
 -- Engineering inventory access
+DROP POLICY IF EXISTS "engineering_inventory_view" ON engineering_inventory;
 CREATE POLICY "engineering_inventory_view"
 ON engineering_inventory FOR SELECT
 TO authenticated
@@ -165,6 +197,7 @@ USING (
 );
 
 -- Housekeeping supplies access
+DROP POLICY IF EXISTS "housekeeping_supplies_view" ON housekeeping_supplies;
 CREATE POLICY "housekeeping_supplies_view"
 ON housekeeping_supplies FOR SELECT
 TO authenticated
@@ -174,6 +207,7 @@ USING (
 );
 
 -- Insert policies for managers and up
+DROP POLICY IF EXISTS "inventory_insert_manager" ON rooms_inventory;
 CREATE POLICY "inventory_insert_manager"
 ON rooms_inventory FOR INSERT
 TO authenticated
@@ -182,6 +216,7 @@ WITH CHECK (
     auth.jwt() ->> 'department' = 'Rooms Division'
 );
 
+DROP POLICY IF EXISTS "kitchen_inventory_insert" ON kitchen_inventory;
 CREATE POLICY "kitchen_inventory_insert"
 ON kitchen_inventory FOR INSERT
 TO authenticated
@@ -191,6 +226,7 @@ WITH CHECK (
 );
 
 -- Delete policies for managers and up
+DROP POLICY IF EXISTS "inventory_delete_manager" ON rooms_inventory;
 CREATE POLICY "inventory_delete_manager"
 ON rooms_inventory FOR DELETE
 TO authenticated
@@ -198,6 +234,7 @@ USING (
     auth.jwt() ->> 'staff_level' IN ('director', 'manager')
 );
 
+DROP POLICY IF EXISTS "kitchen_inventory_delete" ON kitchen_inventory;
 CREATE POLICY "kitchen_inventory_delete"
 ON kitchen_inventory FOR DELETE
 TO authenticated

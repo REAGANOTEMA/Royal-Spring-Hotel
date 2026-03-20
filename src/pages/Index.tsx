@@ -13,20 +13,29 @@ import { cn } from '@/lib/utils';
 
 const heroSlides = [
   {
-    url: 'https://images.unsplash.com/photo-1590523277543-a94d2e4eb00b?auto=format&fit=crop&q=80&w=2000',
-    title: 'Tropical Paradise',
-    subtitle: 'Experience the serenity of our lush palm gardens and vibrant tropical flora.',
+    url: '/bed.jpg',
+    title: 'Luxury Bedding',
+    subtitle: 'Rest your head on the finest linens and experience ultimate comfort in our premium suites.',
   },
   {
-    url: 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=2000',
+    url: '/hotel-house3.webp',
     title: 'Royal Comfort',
-    subtitle: 'Indulge in our masterfully designed suites featuring the finest luxury linens.',
+    subtitle: 'Indulge in our masterfully designed accommodations with breathtaking views.',
   },
   {
-    url: 'https://images.unsplash.com/photo-1598502136455-c959d7715b21?auto=format&fit=crop&q=80&w=2000',
+    url: '/hotel-house1.webp',
     title: 'Garden Sanctuary',
-    subtitle: 'Relax in our serene outdoor lounges surrounded by majestic greenery.',
+    subtitle: 'Relax in our serene outdoor spaces surrounded by majestic tropical greenery.',
   },
+];
+
+const galleryImages = [
+  { src: '/hotel-house2.webp', title: 'Elegant Entrance', category: 'Facility' },
+  { src: '/hotel-house4.webp', title: 'Poolside Lounge', category: 'Amenities' },
+  { src: '/hotel-house5.webp', title: 'Garden Pathways', category: 'Nature' },
+  { src: '/hotel-house6.webp', title: 'Dining Area', category: 'Dining' },
+  { src: '/hotel-house8.webp', title: 'Resort View', category: 'Views' },
+  { src: '/water-spring.webp', title: 'Natural Springs', category: 'Nature' },
 ];
 
 const testimonials = [
@@ -221,6 +230,37 @@ const Index = () => {
                 referrerPolicy="no-referrer-when-downgrade"
               />
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gallery Section */}
+      <section id="gallery" className="py-32 bg-slate-50">
+        <div className="container mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-20">
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tighter uppercase">Photo Gallery</h2>
+            <p className="text-slate-500 text-lg font-medium">Explore the beauty and elegance of Royal Springs Resort through our curated collection of stunning photography.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {galleryImages.map((image, index) => (
+              <motion.div
+                key={index}
+                whileHover={{ scale: 1.05 }}
+                className="group relative h-80 rounded-[2rem] overflow-hidden shadow-xl cursor-pointer"
+              >
+                <img
+                  src={image.src}
+                  alt={image.title}
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end justify-start p-8">
+                  <div className="space-y-2">
+                    <p className="text-xs font-black text-blue-400 uppercase tracking-widest">{image.category}</p>
+                    <h3 className="text-2xl font-black text-white">{image.title}</h3>
+                  </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </div>
       </section>
