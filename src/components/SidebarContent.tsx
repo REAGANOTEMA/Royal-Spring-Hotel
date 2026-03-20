@@ -9,6 +9,7 @@ import {
   ShieldCheck, UtensilsCrossed, Sparkles, Wrench, Banknote, Settings 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { normalizeStaffLevel } from '@/utils/rbac';
 
 interface SidebarContentProps {
   role: string | null;
@@ -19,29 +20,30 @@ interface SidebarContentProps {
 
 const SidebarContent = ({ role, userName, location, onClose }: SidebarContentProps) => {
   const menuItems = [
-    { icon: LayoutDashboard, label: 'DASHBOARD', path: '/dashboard', roles: ['director', 'gm', 'hr', 'accountant', 'staff'] },
-    { icon: MessageSquare, label: 'MESSAGES', path: '/messages', roles: ['director', 'gm', 'staff'] },
-    { icon: BedDouble, label: 'ROOMS', path: '/rooms', roles: ['director', 'gm', 'staff'] },
-    { icon: CalendarCheck, label: 'BOOKINGS', path: '/bookings', roles: ['director', 'gm', 'staff'] },
-    { icon: Receipt, label: 'BILLING', path: '/billing', roles: ['director', 'gm', 'accountant', 'staff'] },
-    { icon: UtensilsCrossed, label: 'KITCHEN', path: '/kitchen', roles: ['director', 'gm', 'chef'] },
-    { icon: Sparkles, label: 'HOUSEKEEPING', path: '/housekeeping', roles: ['director', 'gm', 'staff'] },
-    { icon: Wrench, label: 'MAINTENANCE', path: '/maintenance', roles: ['director', 'gm', 'staff'] },
-    { icon: Users, label: 'GUESTS', path: '/guests', roles: ['director', 'gm', 'staff'] },
-    { icon: Package, label: 'INVENTORY', path: '/inventory', roles: ['director', 'gm', 'accountant'] },
-    { icon: BarChart3, label: 'FINANCE', path: '/finance', roles: ['director', 'gm', 'accountant'] },
-    { icon: Banknote, label: 'PAYROLL', path: '/payroll', roles: ['director', 'gm', 'hr', 'accountant'] },
-    { icon: FileBarChart, label: 'REPORTS', path: '/reports', roles: ['director', 'gm'] },
-    { icon: UserCog, label: 'HR & STAFF', path: '/hr', roles: ['director', 'gm', 'hr'] },
+    { icon: LayoutDashboard, label: 'DASHBOARD', path: '/dashboard', roles: ['director', 'manager', 'supervisor', 'staff', 'hr', 'accountant'] },
+    { icon: MessageSquare, label: 'MESSAGES', path: '/messages', roles: ['director', 'manager', 'supervisor', 'staff', 'hr', 'accountant'] },
+    { icon: BedDouble, label: 'ROOMS', path: '/rooms', roles: ['director', 'manager', 'supervisor', 'staff'] },
+    { icon: CalendarCheck, label: 'BOOKINGS', path: '/bookings', roles: ['director', 'manager', 'supervisor', 'staff'] },
+    { icon: Receipt, label: 'BILLING', path: '/billing', roles: ['director', 'manager', 'accountant'] },
+    { icon: UtensilsCrossed, label: 'KITCHEN', path: '/kitchen', roles: ['director', 'manager', 'chef'] },
+    { icon: Sparkles, label: 'HOUSEKEEPING', path: '/housekeeping', roles: ['director', 'manager', 'supervisor'] },
+    { icon: Wrench, label: 'MAINTENANCE', path: '/maintenance', roles: ['director', 'manager', 'supervisor'] },
+    { icon: Users, label: 'GUESTS', path: '/guests', roles: ['director', 'manager', 'supervisor', 'staff'] },
+    { icon: Package, label: 'INVENTORY', path: '/inventory', roles: ['director', 'manager', 'accountant'] },
+    { icon: BarChart3, label: 'FINANCE', path: '/finance', roles: ['director', 'manager', 'accountant'] },
+    { icon: Banknote, label: 'PAYROLL', path: '/payroll', roles: ['director', 'hr', 'accountant'] },
+    { icon: FileBarChart, label: 'REPORTS', path: '/reports', roles: ['director', 'manager'] },
+    { icon: UserCog, label: 'HR & STAFF', path: '/hr', roles: ['director', 'manager', 'hr'] },
     { icon: ShieldCheck, label: 'USERS', path: '/users', roles: ['director'] },
     { icon: Briefcase, label: 'CAREERS', path: '/job-postings', roles: ['director', 'hr'] },
-    { icon: ImageIcon, label: 'MEDIA', path: '/media', roles: ['director', 'gm'] },
+    { icon: ImageIcon, label: 'MEDIA', path: '/media', roles: ['director', 'manager'] },
     { icon: ShieldAlert, label: 'SECURITY', path: '/security', roles: ['director'] },
-    { icon: AlertCircle, label: 'INCIDENTS', path: '/incidents', roles: ['director', 'gm', 'staff'] },
+    { icon: AlertCircle, label: 'INCIDENTS', path: '/incidents', roles: ['director', 'manager', 'supervisor', 'staff'] },
     { icon: Settings, label: 'SETTINGS', path: '/settings', roles: ['director'] },
   ];
 
-  const filteredItems = menuItems.filter(item => role && item.roles.includes(role));
+  const normalizedRole = normalizeStaffLevel(role);
+  const filteredItems = menuItems.filter(item => item.roles.includes(normalizedRole));
 
   return (
     <div className="flex flex-col h-full bg-slate-950 text-white">

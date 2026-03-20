@@ -37,6 +37,8 @@ const Dashboard = () => {
     occupancyRate: 0
   });
   const [recentLogs, setRecentLogs] = useState<any[]>([]);
+  const [employeeOfMonth, setEmployeeOfMonth] = useState<any>(null);
+  const [recentPromotions, setRecentPromotions] = useState<any[]>([]);
   const { speak } = useAdvancedVoice();
 
   useEffect(() => {
@@ -79,6 +81,46 @@ const Dashboard = () => {
         .limit(5);
       
       setRecentLogs(logs || []);
+
+      // 3. Fetch Employee Recognition (Employee of the Month + Promotions)
+      const { data: eom } = await supabase
+        .from('employee_recognition')
+        .select('*')
+        .eq('recognition_type', 'employee_of_month')
+        .order('effective_date', { ascending: false })
+        .limit(1);
+
+      if (eom && eom.length > 0) {
+        const winner = eom[0];
+        const { data: winnerStaff } = await supabase
+          .from('staff')
+          .select('name, department, avatar_url')
+          .eq('id', winner.staff_id)
+          .single();
+
+        setEmployeeOfMonth({ ...winner, staff: winnerStaff });
+      } else {
+        setEmployeeOfMonth(null);
+      }
+
+      const { data: promotionData } = await supabase
+        .from('employee_recognition')
+        .select('*')
+        .eq('recognition_type', 'promotion')
+        .order('effective_date', { ascending: false })
+        .limit(5);
+
+      const promotedStaffIds = (promotionData || []).map((item) => item.staff_id);
+      const { data: promotedStaff } = await supabase
+        .from('staff')
+        .select('id, name, department, avatar_url')
+        .in('id', promotedStaffIds);
+
+      const promotionsWithStaff = (promotionData || []).map((item) => ({
+        ...item,
+        staff: (promotedStaff || []).find((staff) => staff.id === item.staff_id) || null,
+      }));
+      setRecentPromotions(promotionsWithStaff);
     };
 
     fetchDashboardData();
@@ -173,6 +215,59 @@ const Dashboard = () => {
                   <h3 className="text-2xl font-black">UGX {stats.dailyRevenue.toLocaleString()}</h3>
                   <p className="text-[10px] font-bold text-blue-300 mt-1">Today's Earnings</p>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Recognition highlights */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <Card className="border-none shadow-xl bg-white rounded-[2rem] overflow-hidden">
+              <CardHeader className="bg-blue-50 px-6 py-4">
+                <CardTitle className="text-sm uppercase tracking-widest text-blue-500">Employee of the Month</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6">
+                {employeeOfMonth ? (
+                  <div className="space-y-4">
+                    <p className="text-lg font-black text-slate-900">{employeeOfMonth.title}</p>
+                    <p className="text-sm text-slate-500">{new Date(employeeOfMonth.effective_date).toLocaleDateString()}</p>
+                    <div className="flex items-center gap-3">
+                      <img src={employeeOfMonth.staff?.avatar_url || '/profile-placeholder.png'} alt={employeeOfMonth.staff?.name} className="w-12 h-12 rounded-full object-cover" />
+                      <div>
+                        <p className="font-bold text-slate-900">{employeeOfMonth.staff?.name || 'Unknown'}</p>
+                        <p className="text-xs text-slate-500">{employeeOfMonth.staff?.department || 'Department'}</p>
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-600">{employeeOfMonth.notes || 'Outstanding performance, teamwork, and leadership in the current month.'}</p>
+                  </div>
+                ) : (
+                  <p className="text-slate-500">No employee of the month assigned yet.</p>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2 border-none shadow-xl bg-white rounded-[2rem] overflow-hidden">
+              <CardHeader className="bg-blue-50 px-6 py-4">
+                <CardTitle className="text-sm uppercase tracking-widest text-blue-500">Recent Promotions</CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-3">
+                {recentPromotions.length > 0 ? (
+                  recentPromotions.map((promo) => (
+                    <div key={promo.id} className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                      <div className="flex items-center gap-3 mb-2">
+                        <img src={promo.staff?.avatar_url || '/profile-placeholder.png'} alt={promo.staff?.name} className="w-9 h-9 rounded-full object-cover" />
+                        <div>
+                          <p className="font-bold text-slate-900">{promo.staff?.name || 'TBD'}</p>
+                          <p className="text-xs text-slate-500">{promo.staff?.department || 'Department'}</p>
+                        </div>
+                      </div>
+                      <p className="text-sm font-semibold text-slate-700">{promo.title}</p>
+                      <p className="text-xs text-slate-500">Effective: {new Date(promo.effective_date).toLocaleDateString()}</p>
+                      <p className="text-sm text-slate-600 mt-1">{promo.notes || 'Recognition for consistent productivity and excellent conduct.'}</p>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-slate-500">No promotions recorded yet.</p>
+                )}
               </CardContent>
             </Card>
           </div>

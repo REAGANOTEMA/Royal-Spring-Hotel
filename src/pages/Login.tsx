@@ -28,10 +28,12 @@ const AuthPage = () => {
   const [isSignup, setIsSignup] = useState(false);
 
   const handleDemoLogin = () => {
-    localStorage.setItem("userRole", role);
+    const normalizedDemoRole = role === 'gm' ? 'manager' : role;
+    localStorage.setItem("userRole", normalizedDemoRole);
     localStorage.setItem("userName", "Royal Executive");
+    localStorage.setItem("userDepartment", "Executive Board");
     localStorage.setItem("demoMode", "true");
-    showSuccess(`Welcome to Royal Springs (Demo Mode: ${role.toUpperCase()})`);
+    showSuccess(`Welcome to Royal Springs (Demo Mode: ${normalizedDemoRole.toUpperCase()})`);
     navigate("/dashboard");
   };
 
@@ -43,13 +45,29 @@ const AuthPage = () => {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       if (error) throw error;
 
-      const userRole = data.user?.user_metadata?.staff_level || data.user?.user_metadata?.role || 'staff';
+      const userRoleRaw = data.user?.user_metadata?.staff_level || data.user?.user_metadata?.role || 'staff';
+      let userRole = userRoleRaw;
+      let userDepartment = '';
+
+      // read from staff table for stronger RBAC and department assignment
+      const { data: staffRecord } = await supabase
+        .from('staff')
+        .select('department, staff_level')
+        .or(`auth_email.eq.${email},email.eq.${email}`)
+        .single();
+
+      if (staffRecord) {
+        userDepartment = staffRecord.department || '';
+        userRole = staffRecord.staff_level || userRole;
+      }
+
       const userName = data.user?.user_metadata?.full_name || email.split('@')[0];
-      
+
       localStorage.setItem("userRole", userRole);
       localStorage.setItem("userName", userName);
       localStorage.setItem("userId", data.user.id);
-      
+      localStorage.setItem("userDepartment", userDepartment || '');
+
       showSuccess(`Welcome back, ${userName}!`);
       navigate("/dashboard");
     } catch (err: any) {

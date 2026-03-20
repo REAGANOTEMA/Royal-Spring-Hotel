@@ -38,7 +38,7 @@ const Careers: React.FC = () => {
 
       <section className="bg-slate-900 text-white py-24 px-6 text-center relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
-          <img src="https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80&w=2000" alt="Background" className="w-full h-full object-cover" />
+          <img src="/hotel-house.webp" alt="Background" className="w-full h-full object-cover" />
         </div>
         <div className="relative z-10">
           <h1 className="text-4xl md:text-6xl font-black mb-6 tracking-tighter">Join Our Royal Team</h1>

@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
 import { showSuccess, showError } from "@/utils/toast";
 import { supabase } from "@/lib/supabase";
 import { cn } from "@/lib/utils";
@@ -17,6 +20,11 @@ import { cn } from "@/lib/utils";
 const HR = () => {
   const [staff, setStaff] = useState<any[]>([]);
   const [attendance, setAttendance] = useState<any[]>([]);
+  const [employeeOfMonth, setEmployeeOfMonth] = useState<any>(null);
+  const [promotions, setPromotions] = useState<any[]>([]);
+  const [selectedStaffForRecognition, setSelectedStaffForRecognition] = useState<string>("");
+  const [promotionTitle, setPromotionTitle] = useState<string>("");
+  const [promotionNotes, setPromotionNotes] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<string>("");
   const [departments, setDepartments] = useState<string[]>([]);
@@ -32,6 +40,23 @@ const HR = () => {
 
     setStaff(staffData || []);
     setAttendance(attendData || []);
+
+    // Recognition data
+    const { data: eomData } = await supabase
+      .from('employee_recognition')
+      .select('*')
+      .eq('recognition_type', 'employee_of_month')
+      .order('effective_date', { ascending: false })
+      .limit(1);
+    setEmployeeOfMonth(eomData?.[0] || null);
+
+    const { data: promotionsData } = await supabase
+      .from('employee_recognition')
+      .select('*')
+      .eq('recognition_type', 'promotion')
+      .order('effective_date', { ascending: false })
+      .limit(10);
+    setPromotions(promotionsData || []);
     
     // Extract unique departments
     const depts = [...new Set((staffData || []).map(s => s.department).filter(Boolean))];
@@ -100,6 +125,60 @@ const HR = () => {
       fetchData();
     } catch (err: any) {
       showError("Attendance update failed.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSetEmployeeOfMonth = async () => {
+    if (!selectedStaffForRecognition) {
+      showError('Select a staff member first.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await supabase.from('employee_recognition').insert([{
+        staff_id: selectedStaffForRecognition,
+        recognition_type: 'employee_of_month',
+        title: 'Employee of the Month',
+        notes: 'Recognized for outstanding customer service and team leadership',
+        awarded_by: (await supabase.auth.getUser()).data.user?.id,
+        effective_date: new Date().toISOString().split('T')[0]
+      }]);
+
+      showSuccess('Employee of the Month set successfully');
+      fetchData();
+    } catch (err: any) {
+      showError(err.message || 'Failed to assign Employee of the Month');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddPromotion = async () => {
+    if (!selectedStaffForRecognition || !promotionTitle) {
+      showError('Select a staff member and promotion title first.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await supabase.from('employee_recognition').insert([{
+        staff_id: selectedStaffForRecognition,
+        recognition_type: 'promotion',
+        title: promotionTitle,
+        notes: promotionNotes,
+        awarded_by: (await supabase.auth.getUser()).data.user?.id,
+        effective_date: new Date().toISOString().split('T')[0]
+      }]);
+
+      showSuccess('Promotion recorded successfully');
+      setPromotionTitle('');
+      setPromotionNotes('');
+      fetchData();
+    } catch (err: any) {
+      showError(err.message || 'Failed to record promotion');
     } finally {
       setLoading(false);
     }
@@ -243,6 +322,81 @@ const HR = () => {
               </button>
             ))}
           </div>
+
+          {/* Recognition Management */}
+          <Card className="border-none shadow-xl bg-white rounded-[2rem] overflow-hidden">
+            <CardHeader className="border-b px-8 py-6">
+              <CardTitle className="text-xl font-black">Employee Recognition</CardTitle>
+            </CardHeader>
+            <CardContent className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-xs font-bold uppercase tracking-widest text-slate-500">Select Staff</Label>
+                  <select
+                    value={selectedStaffForRecognition}
+                    onChange={e => setSelectedStaffForRecognition(e.target.value)}
+                    className="mt-2 w-full rounded-xl border p-3"
+                  >
+                    <option value="">Choose staff</option>
+                    {staff.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name} - {s.department}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <Label className="text-xs font-bold uppercase tracking-widest text-slate-500">Promotion Title</Label>
+                  <Input
+                    value={promotionTitle}
+                    onChange={(e) => setPromotionTitle(e.target.value)}
+                    placeholder="Senior Front Desk Officer"
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label className="text-xs font-bold uppercase tracking-widest text-slate-500">Promotion Notes</Label>
+                  <Textarea
+                    value={promotionNotes}
+                    onChange={(e) => setPromotionNotes(e.target.value)}
+                    placeholder="Promotion notes..."
+                    className="mt-2 h-24"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-3">
+                <Button onClick={handleSetEmployeeOfMonth} className="bg-blue-700 text-white rounded-xl">Set Employee of the Month</Button>
+                <Button onClick={handleAddPromotion} className="bg-emerald-700 text-white rounded-xl">Save Promotion</Button>
+              </div>
+
+              <div className="mt-6">
+                <h3 className="text-sm font-black uppercase tracking-widest text-slate-500">Current Employee of the Month</h3>
+                {employeeOfMonth ? (
+                  <div className="p-4 mt-2 border rounded-xl bg-blue-50">
+                    <p className="font-bold text-slate-900">{employeeOfMonth.title}</p>
+                    <p className="text-slate-700">{employeeOfMonth.notes}</p>
+                    <p className="text-xs text-slate-500">Effective: {new Date(employeeOfMonth.effective_date).toLocaleDateString()}</p>
+                  </div>
+                ) : (
+                  <p className="text-slate-500 mt-2">No employee of the month has been selected yet.</p>
+                )}
+              </div>
+
+              <div className="mt-6">
+                <h3 className="text-sm font-black uppercase tracking-widest text-slate-500">Recent Promotions</h3>
+                <div className="mt-2 space-y-2">
+                  {promotions.length > 0 ? promotions.map((promo) => (
+                    <div key={promo.id} className="p-3 border rounded-xl bg-slate-50">
+                      <p className="font-bold text-slate-900">{promo.title} - {staff.find(s => s.id === promo.staff_id)?.name || 'Staff'}</p>
+                      <p className="text-xs text-slate-500">{new Date(promo.effective_date).toLocaleDateString()}</p>
+                      <p className="text-slate-700">{promo.notes}</p>
+                    </div>
+                  )) : <p className="text-slate-500">No promotion records found.</p>}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Attendance Table */}
           <Card className="border-none shadow-xl bg-white rounded-[2rem] overflow-hidden">

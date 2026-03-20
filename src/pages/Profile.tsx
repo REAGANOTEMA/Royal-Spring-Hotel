@@ -19,6 +19,7 @@ import { supabase } from "@/lib/supabase";
 
 const Profile: React.FC = () => {
   const [staff, setStaff] = useState<any>(null);
+  const [recognition, setRecognition] = useState<any>(null);
   const [attendance, setAttendance] = useState<any[]>([]);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState<"general" | "password" | "email" | "attendance">("general");
@@ -45,6 +46,15 @@ const Profile: React.FC = () => {
         .eq('staff_id', staffData.id)
         .order('check_in', { ascending: false });
       setAttendance(attendData || []);
+
+      const { data: recognitionData } = await supabase
+        .from('employee_recognition')
+        .select('*')
+        .eq('staff_id', staffData.id)
+        .eq('recognition_type', 'employee_of_month')
+        .order('effective_date', { ascending: false })
+        .limit(1);
+      setRecognition(recognitionData?.[0] || null);
       
       // Check if currently checked in
       if (attendData && attendData.length > 0) {
@@ -308,6 +318,18 @@ const Profile: React.FC = () => {
           </div>
           <img src="/logo.png" alt="Royal Springs" className="h-12 object-contain" />
         </header>
+
+        {recognition && (
+          <div className="p-6 max-w-6xl mx-auto">
+            <Alert variant="success" className="rounded-2xl">
+              <div className="flex flex-col gap-2">
+                <p className="font-black text-sm">Congratulations!</p>
+                <p className="text-sm">You are recognized as <strong>Employee of the Month</strong> for {new Date(recognition.effective_date).toLocaleDateString()}.</p>
+                <p className="text-xs text-slate-600">{recognition.notes}</p>
+              </div>
+            </Alert>
+          </div>
+        )}
 
         <div className="p-8 max-w-6xl mx-auto w-full space-y-8">
           {/* Tabs */}

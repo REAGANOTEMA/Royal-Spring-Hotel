@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { showSuccess, showError } from '@/utils/toast';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/lib/supabase';
 
 interface VoiceCommandResult {
   success: boolean;
@@ -130,74 +131,55 @@ const AdvancedVoiceConcierge = ({ context = 'guest', userName }: AdvancedVoiceCo
     setResponseText(text);
   }, [isTTSEnabled]);
 
+  const queryChatGPT = useCallback(async (prompt: string) => {
+    try {
+      const { data, error } = await (window as any).supabase.functions.invoke('bright-endpoint', {
+        body: { 
+          prompt: `You are the Royal Springs Hotel AI Concierge. Answer concisely in 1-2 sentences max. Question: ${prompt}` 
+        }
+      });
+      if (error) {
+        console.error('ChatGPT service error', error);
+        return 'I am sorry, the assistant service is unavailable right now.';
+      }
+      return data?.reply || 'I am ready to answer any question you have.';
+    } catch (err) {
+      console.error('ChatGPT error', err);
+      return 'I am unable to reach the AI service at the moment.';
+    }
+  }, []);
+
   // ==========================================
   // Voice Command Processing
   // ==========================================
   const handleVoiceCommand = useCallback(
     async (transcript: string) => {
       const lowerTranscript = transcript.toLowerCase().trim();
-      setCommandHistory((prev) => [...prev.slice(-9), lowerTranscript]);
+      setCommandHistory((prev) => [...prev.slice(-3), lowerTranscript]); // Reduced history size
 
       console.log('[Voice Command]', lowerTranscript);
-
-      // Define command patterns
-      const commands = {
-        booking: /book|reserve|room|night/i,
-        help: /help|assist|support|how|what/i,
-        location: /location|where|address|map|direction/i,
-        staff: /staff|team|contact|call|phone/i,
-        food: /food|dining|restaurant|menu|eat/i,
-        rooms: /room|suite|bed|accommodation|sleep/i,
-        goodbye: /bye|goodbye|exit|quit|close/i,
+      
+      // Simple direct answers for common queries to be ultra-fast
+      const quickAnswers: Record<string, string> = {
+        'location': 'We are located in Iganga, past Nakalama on Tororo road.',
+        'address': 'We are located in Iganga, past Nakalama on Tororo road.',
+        'directions': 'We are located in Iganga, past Nakalama on Tororo road.',
+        'bye': 'Goodbye! Have a wonderful stay at Royal Springs.',
+        'goodbye': 'Goodbye! Have a wonderful stay at Royal Springs.',
+        'exit': 'Goodbye! Have a wonderful stay at Royal Springs.',
       };
 
-      let matched = false;
-
-      // Check booking
-      if (commands.booking.test(lowerTranscript)) {
-        const response = 'I can help you book a room. Would you like me to show you available rooms or connect you with our booking team?';
-        speak(response);
-        matched = true;
-      }
-      // Check help
-      else if (commands.help.test(lowerTranscript)) {
-        const response = `I'm here to assist you with bookings, information about our facilities, dining reservations, and general inquiries. What would you like help with?`;
-        speak(response);
-        matched = true;
-      }
-      // Check location
-      else if (commands.location.test(lowerTranscript)) {
-        const response = 'Royal Springs Hotel is located in Iganga, Uganda, after Nakalama trading center along Tororo road. Would you like directions or more information?';
-        speak(response);
-        matched = true;
-      }
-      // Check food/dining
-      else if (commands.food.test(lowerTranscript)) {
-        const response = 'We offer world-class dining with authentic Ugandan delicacies and international cuisine. Our restaurant is open from 6 AM to 11 PM. Would you like to make a reservation?';
-        speak(response);
-        matched = true;
-      }
-      // Check rooms
-      else if (commands.rooms.test(lowerTranscript)) {
-        const response = 'We have luxurious suites with premium bedding, garden views, and modern amenities. Would you like to view room options or make a reservation?';
-        speak(response);
-        matched = true;
-      }
-      // Check goodbye
-      else if (commands.goodbye.test(lowerTranscript)) {
-        const response = 'Thank you for using Royal Springs Hotel. Have a wonderful day!';
-        speak(response);
-        stopListening();
-        matched = true;
+      if (quickAnswers[lowerTranscript]) {
+        speak(quickAnswers[lowerTranscript]);
+        if (lowerTranscript.includes('bye') || lowerTranscript.includes('exit')) stopListening();
+        return;
       }
 
-      // If no command matched, provide default response
-      if (!matched) {
-        const response = `I heard: "${transcript}". I can help with bookings, room information, dining, or general inquiries. Please try asking about one of those topics.`;
-        speak(response);
-      }
+      // For everything else, use AI but keep it very precise
+      const aiReply = await queryChatGPT(transcript);
+      speak(aiReply);
     },
-    [speak]
+    [queryChatGPT, speak, stopListening]
   );
 
   // ==========================================
@@ -343,18 +325,6 @@ const AdvancedVoiceConcierge = ({ context = 'guest', userName }: AdvancedVoiceCo
               <div className="space-y-2 border-t pt-3">
                 <p className="text-xs font-black text-slate-700 uppercase">Response:</p>
                 <p className="text-sm text-slate-600">{responseText}</p>
-              </div>
-            )}
-
-            {/* Command History */}
-            {commandHistory.length > 0 && (
-              <div className="space-y-2 border-t pt-3 max-h-32 overflow-y-auto">
-                <p className="text-xs font-black text-slate-700 uppercase">History</p>
-                {commandHistory.map((cmd, i) => (
-                  <p key={i} className="text-xs text-slate-500">
-                    • {cmd}
-                  </p>
-                ))}
               </div>
             )}
           </div>

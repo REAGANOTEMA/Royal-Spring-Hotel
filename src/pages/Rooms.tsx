@@ -44,7 +44,7 @@ const Rooms: React.FC = () => {
       price: Number(newRoom.price),
       floor: newRoom.floor,
       status: 'Available',
-      image: newRoom.image || 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&q=80&w=800'
+      image: newRoom.image || '/bed.jpg'
     };
 
     const { error } = await supabase.from('rooms').insert([roomToAdd]);
@@ -184,7 +184,7 @@ const Rooms: React.FC = () => {
               </div>
               <div className="space-y-2">
                 <Label className="font-bold">Room Image URL</Label>
-                <Input value={newRoom.image} onChange={e => setNewRoom({...newRoom, image: e.target.value})} placeholder="https://images.unsplash.com/..." className="h-12 rounded-xl" />
+                <Input value={newRoom.image} onChange={e => setNewRoom({...newRoom, image: e.target.value})} placeholder="/bed.jpg" className="h-12 rounded-xl" />
               </div>
               <DialogFooter className="pt-4">
                 <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)} className="h-12 rounded-xl font-bold">Cancel</Button>

@@ -1,6 +1,6 @@
 // RBAC (Role-Based Access Control) Utilities
 
-export type StaffLevel = 'director' | 'manager' | 'supervisor' | 'staff';
+export type StaffLevel = 'director' | 'manager' | 'supervisor' | 'staff' | 'hr' | 'accountant' | 'chef';
 
 interface StaffPermissions {
   canViewAll: boolean;
@@ -9,6 +9,18 @@ interface StaffPermissions {
   canAccessFinancial: boolean;
   canAccessPayroll: boolean;
 }
+
+export const normalizeStaffLevel = (rawRole?: string | null): StaffLevel => {
+  const role = (rawRole || 'staff').toString().toLowerCase();
+  if (role === 'gm') return 'manager';
+  if (role === 'director') return 'director';
+  if (role === 'manager') return 'manager';
+  if (role === 'supervisor') return 'supervisor';
+  if (role === 'hr') return 'hr';
+  if (role === 'accountant') return 'accountant';
+  if (role === 'chef') return 'chef';
+  return 'staff';
+};
 
 export const staffPermissions: Record<StaffLevel, StaffPermissions> = {
   director: {
@@ -39,21 +51,59 @@ export const staffPermissions: Record<StaffLevel, StaffPermissions> = {
     canAccessFinancial: false,
     canAccessPayroll: false,
   },
+  hr: {
+    canViewAll: false,
+    canManageOwnDept: true,
+    canManageStaffInDept: true,
+    canAccessFinancial: true,
+    canAccessPayroll: true,
+  },
+  accountant: {
+    canViewAll: false,
+    canManageOwnDept: false,
+    canManageStaffInDept: false,
+    canAccessFinancial: true,
+    canAccessPayroll: true,
+  },
+  chef: {
+    canViewAll: false,
+    canManageOwnDept: false,
+    canManageStaffInDept: false,
+    canAccessFinancial: false,
+    canAccessPayroll: false,
+  },
 };
 
 /**
  * Check if user has permission to view a page
  */
-export const canAccessPage = (userRole: StaffLevel, department: string, requiredRole?: StaffLevel[]): boolean => {
-  if (!userRole) return false;
-  
-  // Directors can access everything
-  if (userRole === 'director') return true;
-  
-  // If specific roles required, check if user's role is in that list
-  if (requiredRole && !requiredRole.includes(userRole)) return false;
-  
-  return true;
+export const canAccessPage = (
+  userRole: StaffLevel,
+  requiredRoles?: StaffLevel[],
+  department?: string,
+  userDepartment?: string
+): boolean => {
+  const normalizedRole = normalizeStaffLevel(userRole);
+
+  if (normalizedRole === 'director') {
+    return true;
+  }
+
+  if (!requiredRoles?.length) {
+    return true;
+  }
+
+  if (requiredRoles.includes(normalizedRole)) {
+    if (department) {
+      if (normalizedRole === 'manager' || normalizedRole === 'supervisor') {
+        return userDepartment === department;
+      }
+      return true;
+    }
+    return true;
+  }
+
+  return false;
 };
 
 /**

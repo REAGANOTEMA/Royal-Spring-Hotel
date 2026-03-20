@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
-import { MessageSquare, Send, X, Bot, User } from 'lucide-react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { MessageSquare, Send, X, Bot, User, Mic, MicOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +16,9 @@ const AIChat = () => {
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -24,10 +26,40 @@ const AIChat = () => {
     }
   }, [messages]);
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+  // Initialize Speech Recognition
+  useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
 
-    const userMsg = { role: 'user', text: input };
+      recognition.onstart = () => setIsListening(true);
+      recognition.onend = () => setIsListening(false);
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInput(transcript);
+        handleSend(transcript);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      recognitionRef.current?.start();
+    }
+  };
+
+  const handleSend = async (overrideInput?: string) => {
+    const messageText = overrideInput || input;
+    if (!messageText.trim() || isLoading) return;
+
+    const userMsg = { role: 'user', text: messageText };
     const newHistory = [...messages, userMsg];
     setMessages(newHistory);
     setInput('');
@@ -36,13 +68,22 @@ const AIChat = () => {
     try {
       // 1. Get AI Response
       const { data: aiData, error: aiError } = await supabase.functions.invoke('bright-endpoint', {
-        body: { prompt: input }
+        body: { 
+          prompt: `You are the Royal Springs Hotel AI Concierge. Answer concisely in 1-2 sentences max. Question: ${messageText}` 
+        }
       });
 
       if (aiError) throw aiError;
       const botResponse = aiData?.reply || "I'm here to help! What else would you like to know?";
       const finalHistory = [...newHistory, { role: 'bot', text: botResponse }];
       setMessages(finalHistory);
+
+      // Speak the response if it was a voice input
+      if (overrideInput && 'speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(botResponse);
+        utterance.rate = 0.95;
+        window.speechSynthesis.speak(utterance);
+      }
 
       // 2. Log to guest_messages for staff visibility
       if (!chatId) {
@@ -100,8 +141,11 @@ const AIChat = () => {
             {isLoading && <div className="italic text-xs text-slate-400 ml-10">AI is typing...</div>}
           </CardContent>
           <div className="p-4 bg-white border-t flex gap-2">
+            <Button size="icon" variant="outline" onClick={toggleListening} className={cn("shrink-0 rounded-xl", isListening ? "bg-red-50 text-red-600 border-red-200" : "text-slate-400")} disabled={isLoading}>
+              {isListening ? <MicOff size={18} className="animate-pulse" /> : <Mic size={18} />}
+            </Button>
             <Input placeholder="Ask anything..." value={input} onChange={(e) => setInput(e.target.value)} onKeyPress={(e) => e.key === 'Enter' && handleSend()} className="flex-1" disabled={isLoading} />
-            <Button size="icon" onClick={handleSend} className="bg-blue-600 hover:bg-blue-700" disabled={isLoading}><Send size={18} /></Button>
+            <Button size="icon" onClick={() => handleSend()} className="bg-blue-600 hover:bg-blue-700" disabled={isLoading}><Send size={18} /></Button>
           </div>
         </Card>
       )}

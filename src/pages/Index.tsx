@@ -12,35 +12,40 @@ import { cn } from '@/lib/utils';
 
 const heroSlides = [
   {
-    url: 'https://images.unsplash.com/photo-1578926078328-123c5e6dae57?auto=format&fit=crop&q=80&w=2000',
+    url: '/bed-hero.jpg',
     title: 'Luxury Bedding',
-    subtitle: 'Rest on the finest Egyptian cotton linens with premium comfort layers.',
+    subtitle: '5-star standard hotel linen, deluxe pillows, and ergonomic mattresses for the best sleep.',
   },
   {
-    url: 'https://images.unsplash.com/photo-1631049307038-da5ec5d083b1?auto=format&fit=crop&q=80&w=2000',
-    title: 'Premium Suites',
-    subtitle: 'Indulge in our masterfully designed accommodations with breathtaking views.',
+    url: '/hotel-house.webp',
+    title: 'Royal Resort Living',
+    subtitle: 'Experience the grandeur of Royal Springs with our breathtaking architecture and lush landscapes.',
   },
   {
-    url: 'https://images.unsplash.com/photo-1585399334593-c5218a51baab?auto=format&fit=crop&q=80&w=2000',
-    title: 'World-Class Dining',
-    subtitle: 'Savor authentic Ugandan delicacies and international gourmet cuisine.',
+    url: '/water-spring.webp',
+    title: 'Natural Serenity',
+    subtitle: 'Relax by our crystal-clear waters and experience the true essence of tranquility.',
   },
 ];
 
 const galleryImages = [
-  { src: 'https://images.unsplash.com/photo-1578926078328-123c5e6dae57?auto=format&fit=crop&q=80&w=800', title: 'Luxury Bedding', category: 'Rooms' },
-  { src: 'https://images.unsplash.com/photo-1631049307038-da5ec5d083b1?auto=format&fit=crop&q=80&w=800', title: 'Suite View', category: 'Rooms' },
-  { src: 'https://images.unsplash.com/photo-1554116682-8aa147e1989b?auto=format&fit=crop&q=80&w=800', title: 'Fine Dining', category: 'Dining' },
-  { src: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&q=80&w=800', title: 'Gourmet Cuisine', category: 'Dining' },
-  { src: 'https://images.unsplash.com/photo-1585399334593-c5218a51baab?auto=format&fit=crop&q=80&w=800', title: 'Restaurant Ambiance', category: 'Dining' },
-  { src: 'https://images.unsplash.com/photo-1632778149955-e89aae19dac8?auto=format&fit=crop&q=80&w=800', title: 'Poolside Resort', category: 'Amenities' },
-  { src: 'https://images.unsplash.com/photo-1582719471384-894fbb16e074?auto=format&fit=crop&q=80&w=800', title: 'Floor Bed Elegance', category: 'Rooms' },
-  { src: 'https://images.unsplash.com/photo-1606521299816-bda78ef14510?auto=format&fit=crop&q=80&w=800', title: 'Luxury Interior', category: 'Rooms' },
-  { src: 'https://images.unsplash.com/photo-1556740738-b6a63e27c4df?auto=format&fit=crop&q=80&w=800', title: 'Premium Breakfast', category: 'Dining' },
-  { src: 'https://images.unsplash.com/photo-1504674900941-0026dba5f582?auto=format&fit=crop&q=80&w=800', title: 'Spa & Wellness', category: 'Amenities' },
-  { src: 'https://images.unsplash.com/photo-1534080564897-61794bdd92da?auto=format&fit=crop&q=80&w=800', title: 'Garden Paradise', category: 'Nature' },
-  { src: 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&q=80&w=800', title: 'Sunset Terrace', category: 'Views' },
+  { src: '/bed-hero.jpg', title: 'Royal Master Suite', category: 'Rooms' },
+  { src: '/bed.jpg', title: 'Luxury Bedding Standard', category: 'Rooms' },
+  { src: '/bed1.jpg', title: 'Deluxe Suite Bedding', category: 'Rooms' },
+  { src: '/bed2.jpg', title: 'Premium Comfort', category: 'Rooms' },
+  { src: '/bed3.jpg', title: 'Executive Sleep Experience', category: 'Rooms' },
+  { src: '/bed4.jpg', title: 'Royal Bedding', category: 'Rooms' },
+  { src: '/hotel-house.webp', title: 'Royal Springs Estate', category: 'Resort' },
+  { src: '/hotel-house1.webp', title: 'Resort Architecture', category: 'Resort' },
+  { src: '/hotel-house2.webp', title: 'Garden View', category: 'Resort' },
+  { src: '/hotel-house3.webp', title: 'Main Wing', category: 'Resort' },
+  { src: '/hotel-house4.webp', title: 'Resort Exterior', category: 'Resort' },
+  { src: '/hotel-house5.webp', title: 'Dining Area', category: 'Dining' },
+  { src: '/hotel-house6.webp', title: 'Peaceful Surroundings', category: 'Resort' },
+  { src: '/hotel-house8.webp', title: 'Evening Glow', category: 'Resort' },
+  { src: '/bathroom-hero2.webp', title: 'Executive Bathroom', category: 'Rooms' },
+  { src: '/bathroom1.webp', title: 'Spa-style Bathroom', category: 'Rooms' },
+  { src: '/water-spring.webp', title: 'Water Spring View', category: 'Amenities' },
 ];
 
 const testimonials = [
@@ -158,6 +163,33 @@ const Index = () => {
               <div className="w-24 h-24 bg-amber-100 text-amber-600 rounded-[2rem] flex items-center justify-center mx-auto mb-8 transition-transform group-hover:scale-110 duration-500"><Utensils size={48} /></div>
               <h3 className="text-2xl font-black uppercase tracking-tight">Fine Dining</h3>
               <p className="text-slate-500 leading-relaxed">Authentic Ugandan delicacies and international gourmet cuisine served in our breathtaking garden setting.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Hotel Standards Section */}
+      <section className="py-32 bg-white">
+        <div className="container mx-auto px-6">
+          <div className="text-center max-w-3xl mx-auto mb-14">
+            <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-4 tracking-tighter uppercase">Hospitality Standards</h2>
+            <p className="text-slate-500 text-lg">Dedicated to world-class comfort in beddings, food, snacks and pool leisure for every Royal Springs guest.</p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="border p-8 rounded-3xl shadow-lg">
+              <h3 className="text-2xl font-black text-slate-900 mb-3">Bedding Standards</h3>
+              <p className="text-slate-600 mb-4">Egyptian cotton linens, hypoallergenic pillows, adjustable mattress firmness options, nightly turndown service, and rigorous hygiene audit per room.</p>
+              <img src="/bed.jpg" alt="Luxury Bedding" className="rounded-2xl w-full h-48 object-cover" />
+            </div>
+            <div className="border p-8 rounded-3xl shadow-lg">
+              <h3 className="text-2xl font-black text-slate-900 mb-3">Food & Snacks</h3>
+              <p className="text-slate-600 mb-4">24/7 chef-driven menus, seasonal Ugandan specialties, health-conscious snacks, dessert platters and snack boxes with local flavors.</p>
+              <img src="/hotel-house5.webp" alt="Gourmet Food" className="rounded-2xl w-full h-48 object-cover" />
+            </div>
+            <div className="border p-8 rounded-3xl shadow-lg">
+              <h3 className="text-2xl font-black text-slate-900 mb-3">Perfect Swimming Pool</h3>
+              <p className="text-slate-600 mb-4">Temperature-controlled pool, lifeguard cover, lane zones, poolside cabanas, beach towel service and nightly lighting set for a resort-grade experience.</p>
+              <img src="/water-spring.webp" alt="Swimming Pool" className="rounded-2xl w-full h-48 object-cover" />
             </div>
           </div>
         </div>

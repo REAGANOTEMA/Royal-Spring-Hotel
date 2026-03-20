@@ -186,6 +186,60 @@ USING (
     auth.jwt() ->> 'department' = 'Food & Beverage'
 );
 
+-- ==========================================
+-- 9. EMPLOYEE RECOGNITION AND PROMOTION TRACKING
+-- ==========================================
+
+CREATE TABLE IF NOT EXISTS employee_recognition (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    staff_id UUID REFERENCES staff(id) ON DELETE CASCADE,
+    recognition_type TEXT NOT NULL, -- e.g., 'employee_of_month', 'promotion'
+    title TEXT NOT NULL,
+    notes TEXT,
+    awarded_by UUID REFERENCES staff(id) ON DELETE SET NULL,
+    effective_date DATE DEFAULT CURRENT_DATE,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE employee_recognition ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "recognition_view_authorized"
+ON employee_recognition FOR SELECT
+TO authenticated
+USING (
+    auth.jwt() ->> 'staff_level' = 'director' OR
+    auth.jwt() ->> 'department' = 'Human Resources' OR
+    staff_id = auth.uid()
+);
+
+CREATE POLICY "recognition_insert_hr_director"
+ON employee_recognition FOR INSERT
+TO authenticated
+WITH CHECK (
+    auth.jwt() ->> 'staff_level' = 'director' OR
+    auth.jwt() ->> 'department' = 'Human Resources'
+);
+
+CREATE POLICY "recognition_update_hr_director"
+ON employee_recognition FOR UPDATE
+TO authenticated
+USING (
+    auth.jwt() ->> 'staff_level' = 'director' OR
+    auth.jwt() ->> 'department' = 'Human Resources'
+)
+WITH CHECK (
+    auth.jwt() ->> 'staff_level' = 'director' OR
+    auth.jwt() ->> 'department' = 'Human Resources'
+);
+
+CREATE POLICY "recognition_delete_hr_director"
+ON employee_recognition FOR DELETE
+TO authenticated
+USING (
+    auth.jwt() ->> 'staff_level' = 'director' OR
+    auth.jwt() ->> 'department' = 'Human Resources'
+);
+
 -- Engineering inventory access
 DROP POLICY IF EXISTS "engineering_inventory_view" ON engineering_inventory;
 CREATE POLICY "engineering_inventory_view"
