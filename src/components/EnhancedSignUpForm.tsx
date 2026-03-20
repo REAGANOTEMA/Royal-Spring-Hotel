@@ -144,7 +144,7 @@ export const EnhancedSignUpForm = ({ onSuccess, isAdminSignup = false }: SignUpF
     setLoading(true);
 
     try {
-      // Create auth user
+      // Step 1: Create auth user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -158,13 +158,34 @@ export const EnhancedSignUpForm = ({ onSuccess, isAdminSignup = false }: SignUpF
         },
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error("Auth signup error:", authError);
+        throw new Error(`Authentication failed: ${authError.message}`);
+      }
 
-      if (authData.user) {
-        // Create staff record
-        const { error: staffError } = await supabase.from("staff").insert([
+      const userId = authData.user?.id;
+      if (!userId) {
+        throw new Error("User ID not returned from signup. Please try again.");
+      }
+
+      // Step 2: Refresh session to ensure JWT is properly set
+      await new Promise(resolve => setTimeout(resolve, 500)); // Small delay for auth to settle
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session) {
+        // For unconfirmed emails, manually set the session
+        const { data: refreshData } = await supabase.auth.refreshSession();
+        if (!refreshData.session) {
+          console.warn("Session not immediately available, attempting staff creation anyway");
+        }
+      }
+
+      // Step 3: Create staff record
+      const { error: staffError, data: staffData } = await supabase
+        .from("staff")
+        .insert([
           {
-            id: authData.user.id,
+            id: userId,
             name: `${formData.firstName} ${formData.lastName}`,
             email: formData.email,
             phone: formData.phone,
@@ -177,35 +198,51 @@ export const EnhancedSignUpForm = ({ onSuccess, isAdminSignup = false }: SignUpF
             status: "Active",
             is_active: true,
           },
-        ]);
+        ])
+        .select();
 
-        if (staffError) {
-          console.error("Staff creation error:", staffError);
-          throw new Error("Staff record creation failed");
-        }
-
-        showSuccess(
-          isAdminSignup
-            ? `Staff account created for ${formData.firstName} ${formData.lastName}!`
-            : "Account created successfully! Check your email to verify."
-        );
-
-        if (onSuccess) {
-          onSuccess();
+      if (staffError) {
+        console.error("Staff creation error:", staffError);
+        console.error("Error code:", staffError.code);
+        console.error("Error details:", staffError);
+        
+        // Provide more helpful error messages
+        if (staffError.code === "42501") {
+          throw new Error(
+            "Permission denied. Please try again or contact your administrator."
+          );
+        } else if (staffError.code === "23505") {
+          throw new Error(
+            "This email is already registered. Please use a different email."
+          );
         } else {
-          setFormData({
-            email: "",
-            password: "",
-            confirmPassword: "",
-            firstName: "",
-            lastName: "",
-            phone: "",
-            dateOfBirth: "",
-            department: "",
-            position: "",
-            staffLevel: "staff",
-          });
+          throw new Error(
+            `Staff record creation failed: ${staffError.message || "Unknown error"}`
+          );
         }
+      }
+
+      showSuccess(
+        isAdminSignup
+          ? `Staff account created for ${formData.firstName} ${formData.lastName}!`
+          : "Account created successfully! Check your email to verify."
+      );
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        setFormData({
+          email: "",
+          password: "",
+          confirmPassword: "",
+          firstName: "",
+          lastName: "",
+          phone: "",
+          dateOfBirth: "",
+          department: "",
+          position: "",
+          staffLevel: "staff",
+        });
       }
     } catch (err: any) {
       console.error("Signup error:", err);
