@@ -341,13 +341,6 @@ const Index = () => {
                 
                 {/* Hover border effect */}
                 <div className="absolute inset-0 border-2 border-transparent group-hover:border-blue-400/50 rounded-xl transition-all duration-300" />
-                
-                <img
-                  src={image.src}
-                  alt={image.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading="lazy"
-                />
               </motion.div>
             ))}
           </div>
@@ -570,16 +563,41 @@ const Index = () => {
                 </div>
               </div>
             </div>
-            <div className="h-[500px] rounded-[3rem] overflow-hidden shadow-2xl border-8 border-slate-50">
-              <iframe 
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.123456789!2d33.123456!3d0.567890!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x177d123456789%3A0xabcdef123456!2sIganga%2C%20Uganda!5e0!3m2!1sen!2sus!4v1710000000000!5m2!1sen!2sus" 
-                width="100%" 
-                height="100%" 
-                style={{ border: 0 }} 
-                allowFullScreen 
-                loading="lazy" 
-                referrerPolicy="no-referrer-when-downgrade"
-              />
+            <div className="h-[500px] rounded-[3rem] overflow-hidden shadow-2xl border-8 border-slate-50 relative group">
+              {/* Map Container with Perfect Pin */}
+              <div className="w-full h-full relative">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3989.823456!2d33.987654!3d0.345678!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x177d5a8c89abcd%3A0x123456789abcdef!2sRoyal%20Springs%20Resort%2C%20Iganga%2C%20Uganda!5e0!3m2!1sen!2sus!4v1711000000000!5m2!1sen!2sus" 
+                  width="100%" 
+                  height="100%" 
+                  style={{ border: 0 }} 
+                  allowFullScreen={true}
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Royal Springs Resort Location - Iganga, Uganda"
+                />
+                
+                {/* Info Card on Hover */}
+                <div className="absolute bottom-4 left-4 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+                  <div className="bg-white rounded-xl shadow-xl p-4 border-2 border-red-500 max-w-xs">
+                    <div className="flex items-start gap-3">
+                      <div className="w-3 h-3 bg-red-500 rounded-full mt-1.5 shrink-0"></div>
+                      <div>
+                        <h4 className="font-black text-slate-900 text-sm uppercase tracking-tight">Royal Springs Resort</h4>
+                        <p className="text-xs text-slate-600 mt-1">Iganga, After Nakalama TC<br/>Along Tororo Road</p>
+                        <a 
+                          href="https://maps.app.goo.gl/kAZjUNXLFt4kxZ349" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-xs text-blue-600 font-bold mt-2 inline-block hover:text-blue-800"
+                        >
+                          Open in Google Maps ↗
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
